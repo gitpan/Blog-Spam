@@ -1,0 +1,26 @@
+lib/Blog/Spam/Server.pm
+lib/Blog/Spam/Plugin/00blacklist.pm
+lib/Blog/Spam/Plugin/00whitelist.pm
+lib/Blog/Spam/Plugin/drone.pm
+lib/Blog/Spam/Plugin/stopwords.pm
+lib/Blog/Spam/Plugin/sfs.pm
+lib/Blog/Spam/Plugin/badip.pm
+lib/Blog/Spam/Plugin/rdns.pm
+lib/Blog/Spam/Plugin/bogusip.pm
+lib/Blog/Spam/Plugin/surbl.pm
+lib/Blog/Spam/Plugin/requiremx.pm
+lib/Blog/Spam/Plugin/lotsaurls.pm
+lib/Blog/Spam/Plugin/emailtests.pm
+lib/Blog/Spam/Plugin/wordcount.pm
+lib/Blog/Spam/Plugin/multilinks.pm
+lib/Blog/Spam/Plugin/strong.pm
+lib/Blog/Spam/Plugin/size.pm
+lib/Blog/Spam/Plugin/bayasian.pm
+lib/Blog/Spam/Plugin/hashcash.pm
+lib/Blog/Spam/Plugin/dropme.pm
+LICENSE
+Makefile.PL
+MANIFEST			This list of files
+MANIFEST.SKIP
+README
+META.yml                                 Module meta-data (added by MakeMaker)

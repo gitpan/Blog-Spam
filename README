@@ -1,0 +1,33 @@
+
+                    =====================
+                       Blog::Spam
+                    =====================
+
+The Blog::Spam module, the associated driver, and the collection of
+plugins allows you to offer an XML-RPC server which may be used to
+test forum/blog comments for SPAM.
+
+Further details may be gleaned from :
+
+   http://blogspam.net/
+
+
+INSTALLATION
+
+To install this module type the following:
+
+   perl Makefile.PL
+   make
+   make test
+   make install
+
+DEPENDENCIES
+
+This module requires no other modules and libraries.
+
+COPYRIGHT AND LICENCE
+
+Copyright (C) 2010 Steve Kemp <steve@steve.org.uk>.  All rights reserved.
+
+This library is free software. You can modify and or distribute it under the same terms as Perl itself.
+
