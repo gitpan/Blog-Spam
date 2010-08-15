@@ -1,4 +1,52 @@
 
+=head1 NAME
+
+Blog::Spam::Plugin::stopwords - Reject comments which contain known-bad words.
+
+=cut
+
+=head1 ABOUT
+
+This plugin is designed to discard comments which contain terms listed
+in a local blacklist.
+
+=cut
+
+=head1 DETAILS
+
+The blacklist must be created and updated by the maintainer of the
+local system, and will be found at B</etc/blogspam/stoplist>.
+
+=cut
+
+=head1 LICENSE
+
+This code is licensed under the terms of the GNU General Public
+License, version 2.  See included file GPL-2 for details.
+
+=cut
+
+=head1 AUTHOR
+
+Steve
+--
+http://www.steve.org.uk/
+
+=cut
+
+=head1 LICENSE
+
+Copyright (c) 2008-2010 by Steve Kemp.  All rights reserved.
+
+This module is free software;
+you can redistribute it and/or modify it under
+the same terms as Perl itself.
+The LICENSE file contains the full text of the license.
+
+=cut
+
+
+
 
 package Blog::Spam::Plugin::stopwords;
 
@@ -28,10 +76,21 @@ sub new
     # verbose?
     $self->{ 'verbose' } = $supplied{ 'verbose' } || 0;
 
+    # the file of stop-words
+    $self->{ 'stopwords' } = "/etc/blogspam/stopwords";
+
     bless( $self, $class );
     return $self;
 }
 
+
+=begin doc
+
+Return the name of this plugin.
+
+=end doc
+
+=cut
 
 sub name
 {
@@ -74,7 +133,13 @@ sub testComment
     #
     #  The stop-words come from this file.
     #
-    my $file = "/etc/blogspam/stopwords";
+    my $file = $self->{ 'stopwords' } || undef;
+
+    #
+    #  No file?  Then return.
+    #
+    return "OK" if ( !defined($file) || !-e $file );
+
 
     #
     #  Get the mtime of the file.
@@ -94,13 +159,33 @@ sub testComment
 
         if ( open( WORDS, "<", $file ) )
         {
-            while (<WORDS>)
-            {
-                my $word = $_;
-                chomp($word);
-                next if ( !length($word) );
 
-                $self->{ 'words' }{ $word } = 1;
+            $self->{ 'words' } = undef;
+            $self->{ 'verbose' } &&
+              print $self->name() . ": re-reading stopwords from $file\n";
+
+            while ( my $line = <WORDS> )
+            {
+
+                # skip blank lines
+                next unless ( $line && length($line) );
+
+                # Skip lines beginning with comments
+                next if ( $line =~ /^([ \t]*)\#/ );
+
+                # strip spaces
+                $line =~ s/^\s+|\s+$//g;
+
+                # strip newline
+                chomp($line);
+
+                # empty now?
+                next unless length($line);
+
+                $self->{ 'words' }{ lc $line } = 1;
+
+                $self->{ 'verbose' } && print "Blacklisting term: $line\n";
+
             }
             close(WORDS);
             $self->{ 'wmtime' } = $mtime;
@@ -123,7 +208,7 @@ sub testComment
 
         if ( $self->{ 'words' }{ $word } )
         {
-            return "SPAM:$word";
+            return "SPAM:stopwords:$word";
         }
     }
 

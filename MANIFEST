@@ -14,6 +14,7 @@ lib/Blog/Spam/Plugin/emailtests.pm
 lib/Blog/Spam/Plugin/wordcount.pm
 lib/Blog/Spam/Plugin/multilinks.pm
 lib/Blog/Spam/Plugin/strong.pm
+lib/Blog/Spam/Plugin/Sample.pm
 lib/Blog/Spam/Plugin/size.pm
 lib/Blog/Spam/Plugin/bayasian.pm
 lib/Blog/Spam/Plugin/hashcash.pm

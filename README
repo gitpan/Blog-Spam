@@ -13,6 +13,7 @@ Further details may be gleaned from :
 
 
 INSTALLATION
+------------
 
 To install this module type the following:
 
@@ -21,11 +22,32 @@ To install this module type the following:
    make test
    make install
 
-DEPENDENCIES
 
-This module requires no other modules and libraries.
+DEPENDENCIES
+------------
+
+This module requires several other modules and libraries which are listed
+as dependencies in the generated Makefile.
+
+USAGE
+-----
+
+Once installed launch "blogspam --verbose" which should attempt to listen
+upon localhost:8888.
+
+If that succeeds then you may "cd tests && ./driver".  This will run a series
+of comment tests against the local daemon.
+
+
+NOTES
+-----
+
+To run scheduled tasks you should add "blogspam --hourly" to your crontab,
+with a suitable frequency.  Similarly add "blogspam --daily" and "blogspam --weekly".
+
 
 COPYRIGHT AND LICENCE
+---------------------
 
 Copyright (C) 2010 Steve Kemp <steve@steve.org.uk>.  All rights reserved.
 

@@ -13,7 +13,7 @@ from blacklisted IP addresses.
 This plugin allows the XML-RPC connection which arrived to contain the
 blacklisted IP addresses - it doesn't blacklist addresses which are
 recorded upon the server this code is running upon.  (For that see
-the module M<Blog::Spam::Plugin::badip).
+the module L<Blog::Spam::Plugin::badip>.
 
 
 =cut

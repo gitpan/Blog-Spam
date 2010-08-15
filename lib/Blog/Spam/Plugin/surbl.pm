@@ -1,4 +1,52 @@
 
+=head1 NAME
+
+Blog::Spam::Plugin::surbl - Discard comments with surbl-listed URLs.
+
+=cut
+
+=head1 ABOUT
+
+This plugin is designed to discard comments which contain URLS which
+are listed in the surbl database.
+
+For more details of the surbl service please consult:
+
+=over 8
+
+=item http://www.surbl.org/
+
+=back
+
+=cut
+
+=head1 LICENSE
+
+This code is licensed under the terms of the GNU General Public
+License, version 2.  See included file GPL-2 for details.
+
+=cut
+
+
+=head1 AUTHOR
+
+Steve
+--
+http://www.steve.org.uk/
+
+=cut
+
+=head1 LICENSE
+
+Copyright (c) 2008-2010 by Steve Kemp.  All rights reserved.
+
+This module is free software;
+you can redistribute it and/or modify it under
+the same terms as Perl itself.
+The LICENSE file contains the full text of the license.
+
+=cut
+
 
 package Blog::Spam::Plugin::surbl;
 
@@ -34,6 +82,14 @@ sub new
     return $self;
 }
 
+
+=begin doc
+
+Return the name of this plugin.
+
+=end doc
+
+=cut
 
 sub name
 {

@@ -27,7 +27,8 @@ your own!)
 =head1 PLUGINS
 
 The core of the server is a collection of plugins, each of which
-will be loaded dynamically from the Blog::Spam::Plugin namespace.
+will be loaded dynamically from the Blog::Spam::Plugin namespace.  Please
+see L<Blog::Spam::Plugin::Sample> for available plugin documentation.
 
 Each plugin will be passed a hash of data from the client, and it
 is expected that the plugin will return a single string result:
@@ -58,7 +59,14 @@ The only mandatory arguments are "comment" and "IP", the rest are
 optional but may be useful and it is recommended you pass them if
 you can.
 
-The return value will either be "OK", or "SPAM: with a reason".
+The return value will either be "OK", or "SPAM".  Optionally a reason
+may be returned in the case a comment is justed as SPAM, for example:
+
+=for example begin
+
+    SPAM:I don't like comments submitted before 9AM.
+
+=for example end
 
 =cut
 
@@ -143,7 +151,7 @@ package Blog::Spam::Server;
 
 
 use vars qw($VERSION);
-our $VERSION = "0.1";
+our $VERSION = "0.2";
 
 #
 #  The modules we require
@@ -216,7 +224,7 @@ sub new
 
 =begin doc
 
-  Create the XML-RPC server.
+Create our child XML-RPC server.
 
 =end doc
 
@@ -234,6 +242,15 @@ sub createServer
     # Create the server object.
     #
     $self->{ 'daemon' } = RPC::XML::Server->new(%options);
+
+    #
+    # Did we fail to bind?
+    #
+    if ( $self->{'daemon'} )
+    {
+        print "Failed to bind!\n";
+        exit 1;
+    }
 
 
     #
@@ -273,7 +290,20 @@ sub createServer
         } );
 
     $self->{ 'verbose' } && print "Added RPC methods\n";
+}
 
+
+=begin doc
+
+Load the plugins we might have present.
+
+=end doc
+
+=cut
+
+sub loadPlugins
+{
+    my( $self ) = ( @_ );
 
     #
     #  Load our plugins once.
@@ -284,11 +314,40 @@ sub createServer
     #  Sort by name.
     #
     my @sorted = map {$_->[0]}
-      sort {$b->[1] cmp $a->[1]}
+      sort {$a->[1] cmp $b->[1]}
       map {[$_, ( $_->name() )]} @plugins;
 
     @{ $self->{ 'plugins' } } = @sorted;
 }
+
+
+
+=begin doc
+
+Run any scheduled tasks.
+
+=end doc
+
+=cut
+
+sub runTasks
+{
+    my( $self, $label ) = ( @_ );
+
+    $self->{'verbose'} && print "Running tasks: $label\n";
+
+    foreach my $plugin ( @{ $self->{'plugins'} } )
+    {
+        my $name = $plugin->name();
+
+        next unless( $plugin->can( "expire" ) );
+
+        $self->{'verbose'} && print "\tcalling $name\n";
+    }
+
+    $self->{'verbose'} && print "\tCompleted\n";
+}
+
 
 
 
