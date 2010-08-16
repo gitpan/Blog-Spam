@@ -1,0 +1,24 @@
+
+misc/
+----
+
+This directory contains miscellaneous things that might be useful
+to users.
+
+
+init.script
+-----------
+
+ A debian-flavoured initscript.  It relies upon their being a local
+Unix account named s-blogspam, as the daemon is started under that UID
+and in that home directory.
+
+
+crontab
+-------
+
+A script which will schedule maintainance, and which again relies upon
+a local s-blogspam user.
+
+
+

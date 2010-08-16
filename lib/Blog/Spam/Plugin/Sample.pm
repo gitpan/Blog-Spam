@@ -142,12 +142,15 @@ object, and the second is a frequency label:
 =over 8
 
 =item hourly
+
 This method has been called once per hour.
 
 =item daily
+
 This method has been called once per day.
 
 =item weekly
+
 This method has been called once per week.
 
 =back

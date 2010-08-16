@@ -40,7 +40,7 @@ This allows a limited amount of re-training for a submitted comment.
 
 =back
 
-Each of these methods will be discussed in order of important, and
+Each of these methods will be discussed in order of importance, and
 additional documentation is available online via http://api.blogspam.net/
 
 =cut
@@ -61,8 +61,8 @@ The testComment method has the following XML-RPC signature:
 (This means the method takes a "struct" as an argument, and returns
 a string.  In Perl terms the struct is a hash.)
 
-When calling this method you should pass the following parameters to
-the method:
+When calling this method the hash of options may contain the following
+keys:
 
    agent   - The user-agent of the submitting browser, if any.
    comment - The body of the comment
@@ -71,13 +71,14 @@ the method:
    name    - The name the user chose, if any.
    subject - The subject the user chose, if any.
 
-   options - Discussed in L</"TESTING OPTIONS"|TESTING OPTIONS>.
+   options - Discussed in L<TESTING OPTIONS|/"TESTING OPTIONS">.
 
-The only mandatory arguments are "comment" and "IP", the rest are
+The only mandatory arguments are "comment" and "ip", the rest are
 optional but may be useful and it is recommended you pass them if
-you can.
+you can.  (Each key should be lower-cased.)
 
 The return value from this method will either be "OK", or "SPAM".
+
 Optionally a reason may be returned in the case a comment is judged as
 SPAM, for example:
 
@@ -119,8 +120,11 @@ The getPlugins method has the following XML-RPC signature:
 (This means the method takes no arguments, and returns an array.)
 
 This method does nothing more than return the names of each of the plugins
-which the server has loaded.  These plugins are modules beneath the
-Blog::Server::Plugin:: namespace, and L<Blog::Server::Plugin::Sample> is a good example plugin.
+which the server has loaded.
+
+These plugins are modules beneath the Blog::Server::Plugin:: namespace,
+and L<the sample plugin|Blog::Server::Plugin::Sample> provides a good
+example.
 
 =cut
 
@@ -136,13 +140,18 @@ The getStats method has the following XML-RPC signature:
 
 (This method returns a struct and takes a string as its only argument.)
 
+This method returns a hash containing two keys "OK" and "SPAM".  These
+keys will have statistics for the given domain - or global statistics
+if the method is passed a zero-length string.
+
 =cut
 
 
 =head1 TESTING OPTIONS
 
-You may pass the optional "options" string to the server, if you
-wish finer control over the testing process.
+You may pass the optional "options" key to the hash of arguments provided
+to the testComment method.  This is useful to provide you with the ability
+to tune the behaviour of tests which are made.
 
 This option string should consist of comma-separated tokens.
 
@@ -151,13 +160,15 @@ The permissible values are:
          whitelist=1.2.3.0/24    - Whitelist the given IP / CIDR range.
          blacklist=1.2.3.3/28    - Blacklist the given IP / CIDR range.
 
-         exclude=plugin          - Don't run the plugin with name "plugin".  (You may find a list of plugins via the getPlugins method.)
+         exclude=plugin          - Don't run the plugin with name "plugin".  (You may find a list of plugins via the getPlugins() method.)
 
          mandatory=subject,email - Specify the given field should always be present.
 
          max-links=20            - The maximum number of URLs, as used by L<Blog::Spam::Plugin::loadsalinks>
 
          min-size=1024           - Minimum body size, as used by L<Blog::Spam::Plugin::size>.
+
+         min-words=4            - Minimum word count, as used by L<Blog::Spam::Plugin::wordcount>.
 
          max-size=2k             - Maximum body size,  as used by L<Blog::Spam::Plugin::size>.
 

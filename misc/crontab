@@ -1,0 +1,6 @@
+#
+# blogspam entries to clear caches, etc.
+#
+17 * * * * s-blogspam [ -x /usr/local/bin/blogspam ] && /usr/local/bin/blogspam --hourly
+20 6 * * * s-blogspam [ -x /usr/local/bin/blogspam ] && /usr/local/bin/blogspam --daily
+25 6 1 * * s-blogspam [ -x /usr/local/bin/blogspam ] && /usr/local/bin/blogspam --weekly

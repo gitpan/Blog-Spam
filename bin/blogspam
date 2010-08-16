@@ -71,9 +71,13 @@ run three jobs:
 
 =head1 AUTHOR
 
- Steve
- --
- http://www.steve.org.uk/
+=over 4
+
+=item Steve Kemp
+
+http://www.steve.org.uk/
+
+=back
 
 =cut
 

@@ -18,7 +18,7 @@ The actual testing of submitted comments is handled by a series of
 plugins, each living beneath the 'Blog::Spam::Plugin::' namespace.
 
 For a description of the plugin methods please consult the
-L<Blog::Spam::Plugin::Sample> plugin.
+L<sample plugin|Blog::Spam::Plugin::Sample>.
 
 =cut
 
@@ -51,7 +51,7 @@ package Blog::Spam::Server;
 
 
 use vars qw($VERSION);
-our $VERSION = "0.4";
+our $VERSION = "0.5";
 
 #
 #  The modules we require
