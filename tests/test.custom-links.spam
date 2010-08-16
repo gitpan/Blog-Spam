@@ -1,0 +1,7 @@
+IP: 3.2.1.2
+Options: max-links=3
+
+http://www.one.com/
+http://www.two.com/
+http://www.three.com/
+http://www.four.com/

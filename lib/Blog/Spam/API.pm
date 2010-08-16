@@ -1,7 +1,7 @@
 
 =head1 NAME
 
-Blog::Spam::Server - A description of the XML-RPC API.
+Blog::Spam::API - A description of Blog-Spam XML-RPC API.
 
 =cut
 
@@ -21,17 +21,21 @@ remote locations.  The following methods are documented:
 =over 8
 
 =item testComment
+
 This is the method which is used to test a submitted comment from
 a blog or server.
 
 =item getPlugins
+
 This returns the names of the internal plugins we use - it is used
 such that a remote machine may selectively disable some of them.
 
 =item getStats
+
 Return the statistics for SPAM detection for a given domain.
 
 =item classifyComment
+
 This allows a limited amount of re-training for a submitted comment.
 
 =back
@@ -55,7 +59,7 @@ The testComment method has the following XML-RPC signature:
 =for example end
 
 (This means the method takes a "struct" as an argument, and returns
-a string.  In perl terms the struct is a hash.)
+a string.  In Perl terms the struct is a hash.)
 
 When calling this method you should pass the following parameters to
 the method:
@@ -65,8 +69,9 @@ the method:
    email   - The email address submitted
    ip      - The IP the comment was submitted from.
    name    - The name the user chose, if any.
+   subject - The subject the user chose, if any.
 
-   options - Discussed later, see "TESTING OPTIONS".
+   options - Discussed in L</"TESTING OPTIONS"|TESTING OPTIONS>.
 
 The only mandatory arguments are "comment" and "IP", the rest are
 optional but may be useful and it is recommended you pass them if
@@ -97,7 +102,7 @@ The classifyComment method has the following XML-RPC signature:
 =for example end
 
 (This means the method takes a "struct" as an argument, and returns
-a string.  In perl terms the struct is a hash.)
+a string.  In Perl terms the struct is a hash.)
 
 =cut
 
@@ -112,6 +117,10 @@ The getPlugins method has the following XML-RPC signature:
 =for example end
 
 (This means the method takes no arguments, and returns an array.)
+
+This method does nothing more than return the names of each of the plugins
+which the server has loaded.  These plugins are modules beneath the
+Blog::Server::Plugin:: namespace, and L<Blog::Server::Plugin::Sample> is a good example plugin.
 
 =cut
 
@@ -129,13 +138,11 @@ The getStats method has the following XML-RPC signature:
 
 =cut
 
-=cut
-
 
 =head1 TESTING OPTIONS
 
 You may pass the optional "options" string to the server, if you
-wish finer control.
+wish finer control over the testing process.
 
 This option string should consist of comma-separated tokens.
 
@@ -144,18 +151,17 @@ The permissible values are:
          whitelist=1.2.3.0/24    - Whitelist the given IP / CIDR range.
          blacklist=1.2.3.3/28    - Blacklist the given IP / CIDR range.
 
-         exclude=plugin          - Don't run the plugin with name "plugin".
+         exclude=plugin          - Don't run the plugin with name "plugin".  (You may find a list of plugins via the getPlugins method.)
 
-         mandatory=subject,email - Specify the given field should always be
-                                   present.
+         mandatory=subject,email - Specify the given field should always be present.
 
-         max-links=20            - The maximum number of URLs.
+         max-links=20            - The maximum number of URLs, as used by L<Blog::Spam::Plugin::loadsalinks>
 
-         min-size=1024           - Minimum body size.
+         min-size=1024           - Minimum body size, as used by L<Blog::Spam::Plugin::size>.
 
-         max-size=2k             - Maximum body size
+         max-size=2k             - Maximum body size,  as used by L<Blog::Spam::Plugin::size>.
 
-         fail                    - Always return "spam"
+         fail                    - Always return "SPAM".
 
 These options may be repeated, for example the following is a valid
 value for the "options" setting:
@@ -178,20 +184,15 @@ That example will:
 
 =cut
 
-
-=head1 LICENSE
-
-This code is licensed under the terms of the GNU General Public
-License, version 2.  See included file GPL-2 for details.
-
-=cut
-
-
 =head1 AUTHOR
 
-Steve
---
+=over 4
+
+=item Steve Kemp
+
 http://www.steve.org.uk/
+
+=back
 
 =cut
 

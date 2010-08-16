@@ -1,4 +1,55 @@
 
+=head1 NAME
+
+Blog::Spam::Plugin::bayasian - Bayasian analysis of submitted comments.
+
+=cut
+
+=head1 ABOUT
+
+This plugin is designed to perform Bayasian analysis upon the content of
+submitted comments, with an aim of automatically rejecting comments which
+have spammy contents.
+
+=cut
+
+=head1 DETAILS
+
+The plugin relies upon a system-wide installation of the B<spambayes>
+script, which is used to analyse contents and judge comment SPAM/HAM
+ratios.
+
+Each site which submits comments against the server will have its own
+unique Spambayes database - so there is no notion of the server storing
+all comment details in a single database.
+
+=cut
+
+=head1 AUTHOR
+
+=over 4
+
+=item Steve Kemp
+
+http://www.steve.org.uk/
+
+=back
+
+=cut
+
+=head1 LICENSE
+
+Copyright (c) 2008-2010 by Steve Kemp.  All rights reserved.
+
+This module is free software;
+you can redistribute it and/or modify it under
+the same terms as Perl itself.
+The LICENSE file contains the full text of the license.
+
+=cut
+
+
+
 package Blog::Spam::Plugin::bayasian;
 
 
@@ -35,6 +86,15 @@ sub new
     return $self;
 }
 
+
+
+=begin doc
+
+Return the name of this plugin.
+
+=end doc
+
+=cut
 
 sub name
 {
@@ -172,8 +232,6 @@ sub classifyComment
     }
 
 
-
-
     #
     #  Get access to our state directory.
     #
@@ -214,10 +272,6 @@ sub classifyComment
         system( "sb_filter.py", "-n", "-d", $db );
     }
 
-    #
-    #  Construct a logfile to record this against.
-    #
-    my $tmp = "/var/log/blogspam/trained-as-$train.$$." . localtime;
 
     #
     #  Map training to appropriate argument
@@ -241,6 +295,9 @@ sub classifyComment
     #
     #  Log to see if we have malicious training.
     #
+    my $trained = $state . "/retrained/";
+    mkpath( $trained, { verbose => 0 } ) unless ( -d $trained );
+    my $tmp = $trained . "/trained-as-$train.$$." . localtime;
     if ( open( LOG, ">", $tmp ) )
     {
         print LOG $body;

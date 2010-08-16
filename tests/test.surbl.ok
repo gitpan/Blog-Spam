@@ -1,0 +1,6 @@
+IP: 1.2.3.4
+options: exclude=badip,exclude=rdns,exclude=sfs
+
+http://www.steve.org.uk/
+
+test test test

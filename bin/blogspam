@@ -1,0 +1,194 @@
+#!/usr/bin/perl -I./lib/ -I./
+
+=head1 NAME
+
+blogspam - An RPC server for testing blog comments
+
+=cut
+
+=head1 SYNOPSIS
+
+  blogspam [options]
+
+  Path Options:
+
+   --state       Specify the path to the state directory.
+
+  Cache Cleanup Options:
+
+   --hourly      Run hourly tasks.
+   --daily       Run daily tasks.
+   --weekly      Run weekly tasks.
+
+  Help Options:
+
+   --help        Show the help information for this script.
+   --manual      Read the manual for this script.
+   --verbose     Show useful debugging information.
+
+=cut
+
+
+=head1 OVERVIEW
+
+The blogspam server makes use of the L<Blog::Spam::Server> module
+to present an XML-RPC server for the use of testing comments for
+spam.
+
+It is ideally suited for small and medium sized blogs, forums, and
+similar sites which accept comments from users and which may be
+attacked by the submission of spam comments.
+
+=cut
+
+=head1 ABOUT
+
+This script is designed to be started by a non-privileged user,
+where it will launch an L<RPC::XML::Server> instance listening
+upon the network.  By default port 8888 will be used,but this may
+be changed via the appropriate command line option.
+
+All state will be stored in the home directory of the user
+B<s-blogspam> if it exists upon the local system, otherwise in
+the current working directory beneath a directory named B<state/>.
+
+In order to ensure that scheduled tasks are completed it is strongly
+recommended you add crontab entries, running as the launcher, to
+run three jobs:
+
+=for example begin
+
+    # blogspam entries to clear caches, etc.
+
+    17 * * * *	s-blogspam  /usr/local/bin/blogspam --hourly
+    20 6 * * *	s-blogspam  /usr/local/bin/blogspam --daily
+    25 6 1 * *	s-blogspam  /usr/local/bin/blogspam --weekly
+
+=for example end
+
+
+=cut
+
+=head1 AUTHOR
+
+ Steve
+ --
+ http://www.steve.org.uk/
+
+=cut
+
+=head1 LICENSE
+
+Copyright (c) 2007-2010 by Steve Kemp.  All rights reserved.
+
+This module is free software;
+you can redistribute it and/or modify it under
+the same terms as Perl itself.
+The LICENSE file contains the full text of the license.
+
+=cut
+
+
+use strict;
+use warnings;
+
+use Blog::Spam::Server;
+use Getopt::Long;
+use Pod::Usage;
+
+
+#
+#  Configuration options.
+#
+my %CONFIG;
+
+#
+#  Defaults
+#
+$CONFIG{ 'port' } = "8888";
+
+
+
+#
+#  Parse our command line arguments.
+#
+exit
+  if (
+       !GetOptions(
+                   # help options
+                   "help", \$CONFIG{'help'},
+                   "manual", \$CONFIG{'manual'},
+                   "verbose", \$CONFIG{'verbose'},
+
+                   "port=s",  \$CONFIG{ 'port' },
+                    "state=s", \$CONFIG{ 'state' },
+                    "hourly",  \$CONFIG{ 'hourly' },
+                    "daily",   \$CONFIG{ 'daily' },
+                    "weekly",  \$CONFIG{ 'weekly' },
+                  ) );
+
+
+#
+#  Show help if we should
+#
+pod2usage(1) if ( $CONFIG{'help'} );
+pod2usage( -verbose => 2 ) if  ( $CONFIG{'manual'} );
+
+#
+#  Options we pass to the constructor.
+#
+my %opts;
+
+
+#
+#  state directory
+#
+$opts{ 'state' } = $CONFIG{ 'state' } if ( $CONFIG{ 'state' } );
+
+
+#
+#  Pass along --verbose
+#
+$opts{ 'verbose' } = 1 if ( $CONFIG{ 'verbose' } );
+
+
+#
+#  Create the server.
+#
+my $t = Blog::Spam::Server->new(%opts);
+
+#
+#  Load our plugins
+#
+$t->loadPlugins();
+
+#
+#  If we're to run tasks do that.
+#
+if ( $CONFIG{ 'hourly' } )
+{
+    $t->runTasks("hourly");
+    exit;
+}
+if ( $CONFIG{ 'daily' } )
+{
+    $t->runTasks("daily");
+    exit;
+}
+if ( $CONFIG{ 'weekly' } )
+{
+    $t->runTasks("weekly");
+    exit;
+}
+
+#
+#  Force it to bind.
+#
+$t->createServer( port => $CONFIG{ 'port' } );
+
+
+#
+#  Fire her up
+#
+$t->runLoop();
+

@@ -1,0 +1,7 @@
+ip: 12.23.34.55
+email: foof@barlf.com
+Options: exclude=rdns,exclude=badip,exclude=sfs
+name: Steve
+
+
+This is a tst.

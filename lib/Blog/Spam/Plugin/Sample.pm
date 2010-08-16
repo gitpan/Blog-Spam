@@ -168,20 +168,15 @@ sub expire
 1;
 
 
-=cut
-
-=head1 LICENSE
-
-This code is licensed under the terms of the GNU General Public
-License, version 2.  See included file GPL-2 for details.
-
-=cut
-
 =head1 AUTHOR
 
-Steve
---
+=over 4
+
+=item Steve Kemp
+
 http://www.steve.org.uk/
+
+=back
 
 =cut
 

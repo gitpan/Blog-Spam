@@ -1,0 +1,4 @@
+IP: 12.13.14.15
+options: exclude=badip,exclude=rdns
+
+This is test ok.

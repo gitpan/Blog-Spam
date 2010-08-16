@@ -1,0 +1,104 @@
+#!/usr/bin/perl -w
+#
+#  Return the SPAM/OK stats for either the global server
+# or the named domain.
+#
+#  If a host:port is specified on the command line submit against that
+# instead of http://localhost:8888/
+#
+# Steve
+# --
+#
+
+
+use strict;
+use warnings;
+use Getopt::Long;
+
+require RPC::XML;
+require RPC::XML::Client;
+
+
+#
+#  Config
+#
+my %CONFIG;
+
+#
+#  Default server
+#
+$CONFIG{ 'server' } = "http://localhost:8888/";
+
+
+#
+#  Parse our options
+#
+exit if ( !GetOptions( "server=s", \$CONFIG{ 'server' } ) );
+
+
+
+#
+#  Make sure the server is valid
+#
+if ( $CONFIG{ 'server' } !~ /^http:\/\// )
+{
+    $CONFIG{ 'server' } = "http://" . $CONFIG{ 'server' };
+}
+if ( $CONFIG{ 'server' } !~ /:([0-9]+)/ )
+{
+    $CONFIG{ 'server' } .= ":8888/";
+}
+
+
+#
+#  Do it.
+#
+my $result = getStats(shift);
+
+use Data::Dumper;
+print Dumper( \$result );
+
+
+#
+#  All done
+#
+exit;
+
+
+
+
+=begin doc
+
+Make a request against the RPC server for the stats
+
+=end doc
+
+=cut
+
+sub getStats
+{
+    my ($domain) = (@_);
+
+    if ( !defined($domain) ) {$domain = "";}
+
+    my $result;
+
+    #
+    #  Make the result
+    #
+    eval {
+        my $client = RPC::XML::Client->new( $CONFIG{ 'server' } );
+        my $req    = RPC::XML::request->new( 'getStats', $domain );
+        my $res    = $client->send_request($req);
+        $result = $res->value();
+    };
+    if ($@)
+    {
+        print "Connection failed to $CONFIG{'server'}\n";
+        print "Or there was some other error.\n";
+        print "Aborting.\n";
+        exit;
+    }
+
+    return ($result);
+}

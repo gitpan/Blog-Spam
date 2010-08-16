@@ -6,7 +6,6 @@ use ExtUtils::MakeMaker;
 
 my %prereq_pm = (
     'Test::More'         => undef,
-    'CGI::Session'  => undef,
     'Test::More' =>undef,
     'Getopt::Long' => undef,
     'IPC::Open2' => undef,
@@ -17,7 +16,6 @@ my %prereq_pm = (
     'RPC::XML::Server' => undef,
     'Sys::Syslog' => undef,
     'URI::Find' => undef,
-
 );
 
 WriteMakefile(
@@ -39,10 +37,3 @@ prepare_dist ::	metafile manifest dist
 	$(NOECHO) $(NOOP)
 MAKE_TEXT
 }
-
-#sub libscan {
-#    my ($self, $path) = @_;
-#    return '' if $path =~ m/\.svn/;
-#    return $path;
-#}
-

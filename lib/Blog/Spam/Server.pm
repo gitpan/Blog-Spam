@@ -11,9 +11,8 @@ This program implements a plugin-based XML-RPC server which may be
 queried from almost all languages.
 
 The intention is that clients will query this server to detect whether
-their comment submissions are spam or genuine, using our API.
-
-The API we present is fully documented in L<Blog::Spam::API>.
+their comment submissions are spam or genuine, using the API we present
+over the network via XML::RPC - that API is documented in L<Blog::Spam::API>.
 
 The actual testing of submitted comments is handled by a series of
 plugins, each living beneath the 'Blog::Spam::Plugin::' namespace.
@@ -23,20 +22,18 @@ L<Blog::Spam::Plugin::Sample> plugin.
 
 =cut
 
-=head1 LICENSE
-
-This code is licensed under the terms of the GNU General Public
-License, version 2.  See included file GPL-2 for details.
-
-=cut
-
 =head1 AUTHOR
 
-Steve
---
+=over 4
+
+=item Steve Kemp
+
 http://www.steve.org.uk/
 
+=back
+
 =cut
+
 
 =head1 LICENSE
 
@@ -54,7 +51,7 @@ package Blog::Spam::Server;
 
 
 use vars qw($VERSION);
-our $VERSION = "0.3";
+our $VERSION = "0.4";
 
 #
 #  The modules we require
@@ -84,9 +81,11 @@ use warnings;
 
 
 
-=head2 new
+=begin doc
 
-  Create a new instance of this object.
+Create a new instance of this object.
+
+=end doc
 
 =cut
 
@@ -149,7 +148,7 @@ sub createServer
     #
     # Did we fail to bind?
     #
-    if ( $self->{ 'daemon' } )
+    if ( !$self->{ 'daemon' } )
     {
         print "Failed to bind!\n";
         exit 1;
@@ -214,12 +213,47 @@ sub loadPlugins
     my @plugins = $self->plugins( verbose => $self->{ 'verbose' } );
 
     #
+    #  Ignore plugins that don't implement "name()".
+    #
+    my @valid;
+
+    foreach my $plugin (@plugins)
+    {
+
+        #
+        #  Make sure the exported method is there.
+        #
+        if ( $plugin->can("name") )
+        {
+            push( @valid, $plugin );
+        }
+        else
+        {
+
+            #
+            #  Hrm.  This works ..
+            #
+            #  TODO: See if we can drop name() globally.
+            #
+            #  TODO: Module::Pluggable doesn't seem to mention "name".
+            #
+            #
+            print
+              "WARNING: Ignoring plugin which doesn't implement 'sub name(){ ..};'\n";
+            print "Plugin was $plugin->{'name'}\n";
+        }
+    }
+
+    #
     #  Sort by name.
     #
     my @sorted = map {$_->[0]}
       sort {$a->[1] cmp $b->[1]}
-      map {[$_, ( $_->name() )]} @plugins;
+      map {[$_, ( $_->name() )]} @valid;
 
+    #
+    #  Squirrel them away for invokation later.
+    #
     @{ $self->{ 'plugins' } } = @sorted;
 }
 
@@ -241,16 +275,21 @@ sub runTasks
 
     foreach my $plugin ( @{ $self->{ 'plugins' } } )
     {
-        my $name = $plugin->name();
 
+        #
+        #  Ignore plugins which don't implement an 'expire' method.
+        #
+        my $name = $plugin->name();
         next unless ( $plugin->can("expire") );
 
+        #
+        #  Call plugin.
+        #
         $self->{ 'verbose' } && print "\tcalling $name\n";
-
         $plugin->expire( $self, $label );
     }
 
-    $self->{ 'verbose' } && print "\tCompleted\n";
+    $self->{ 'verbose' } && print "\tAll registered tasks executed.\n";
 }
 
 
@@ -258,7 +297,7 @@ sub runTasks
 
 =begin doc
 
-  Run the main loop and don't return.
+Run the main loop of our L<RPC::XML::Server> object and don't return.
 
 =end doc
 
@@ -277,7 +316,7 @@ sub runLoop
 
 =begin doc
 
-  This method is invoked for each incoming blog spam test.
+This method is invoked for each incoming SPAM test.
 
 =end doc
 
@@ -362,6 +401,11 @@ sub testComment
     {
 
         #
+        #  Ignore plugins that don't implement testComment.
+        #
+        next unless ( $plugin->can("testComment") );
+
+        #
         #  The name of the plugin
         #
         my $name = $plugin->name();
@@ -400,10 +444,21 @@ sub testComment
             }
 
         }
+
+        #
+        #  Skip all further tests if either:
+        #
+        #   1.  We already ahve a result.
+        #
+        #   2.  This particular plugin is to be excluded, as
+        #      decided by the caller.
+        #
         next if ($skipThis);
 
         #
-        #  Pass ourself over to the plugin
+        #  Pass ourself over to the plugin - primarily so that
+        # a plugin may call L<getState> to find a location to
+        # persist data to.
         #
         $struct{ 'parent' } = $self;
 

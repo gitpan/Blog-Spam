@@ -1,4 +1,44 @@
 
+=head1 NAME
+
+Blog::Spam::Plugin::sfs - Lookup comment submissions in stopforumspam.com
+
+=cut
+
+=head1 ABOUT
+
+This plugin is designed to test the submitters of comments against the
+stopforumspam.com service.
+
+An IP which is listed in the service will be refused the ability to
+submit comments - and this match will be cached for a week.
+
+=cut
+
+=head1 AUTHOR
+
+=over 4
+
+=item Steve Kemp
+
+http://www.steve.org.uk/
+
+=back
+
+=cut
+
+=head1 LICENSE
+
+Copyright (c) 2008-2010 by Steve Kemp.  All rights reserved.
+
+This module is free software;
+you can redistribute it and/or modify it under
+the same terms as Perl itself.
+The LICENSE file contains the full text of the license.
+
+=cut
+
+
 
 package Blog::Spam::Plugin::sfs;
 
@@ -83,7 +123,7 @@ sub testComment
     $safe =~ s/[:\.]/-/g;
     if ( -e "$cdir/$safe" )
     {
-        return ("SPAM:Listed in stopforumspam.com");
+        return ("SPAM:Cached from stopforumspam.com");
     }
 
 
@@ -151,7 +191,7 @@ sub expire
 
     if ( $frequency eq "weekly" )
     {
-        $self->{ 'verbose' } && print "Cleaning Cache\n";
+        $self->{ 'verbose' } && print "Cleaning SFS Cache\n";
 
         my $state = $parent->getStateDir();
         my $cdir  = $state . "/cache/sfs/";

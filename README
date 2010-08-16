@@ -23,6 +23,18 @@ To install this module type the following:
    make install
 
 
+TESTING
+-------
+
+Run the blogspam script, then test submitting comments against it:
+
+blogspam --verbose
+
+cd ./tests
+./driver
+
+
+
 DEPENDENCIES
 ------------
 

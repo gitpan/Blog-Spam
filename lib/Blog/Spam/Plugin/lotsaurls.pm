@@ -11,27 +11,24 @@ This plugin is designed to discard comments which contain a significant
 number of URLs.
 
 By default 10 URLs is the threshold, but this may be changed by the
-submitter via the optional parameters submitted to the server - see
-http://api.blogspam.net for details of those parameters.
+submitter via the optional parameters submitted to the server.
 
+The options are discussed as part of the L<Blog::Server::API>, in the
+section L<Blog::Server::API/"TESTING OPTIONS"|TESTING OPTIONS>.
 
 All URLS are detected via the L<URI::Find> module.
 
 =cut
 
-
-=head1 LICENSE
-
-This code is licensed under the terms of the GNU General Public
-License, version 2.  See included file GPL-2 for details.
-
-=cut
-
 =head1 AUTHOR
 
-Steve
---
+=over 4
+
+=item Steve Kemp
+
 http://www.steve.org.uk/
+
+=back
 
 =cut
 

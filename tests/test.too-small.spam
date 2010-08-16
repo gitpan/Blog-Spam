@@ -1,0 +1,4 @@
+Options: min-size=1k,exclude=rdns,exclude=badip,exclude=sfs
+IP: 1.2.3.4
+
+short

@@ -1,8 +1,51 @@
+
+=head1 NAME
+
+Blog::Spam::Plugin::drone - Lookup comment submissions in dronebl.org
+
+=cut
+
+=head1 ABOUT
+
+This plugin is designed to test the submitters of comments against the
+dropnbl.org realtime blacklist service.
+
+An IP which is listed in the service will be refused the ability to
+submit comments - and this result will be cached for a week.
+
+=cut
+
+=head1 AUTHOR
+
+=over 4
+
+=item Steve Kemp
+
+http://www.steve.org.uk/
+
+=back
+
+=cut
+
+=head1 LICENSE
+
+Copyright (c) 2008-2010 by Steve Kemp.  All rights reserved.
+
+This module is free software;
+you can redistribute it and/or modify it under
+the same terms as Perl itself.
+The LICENSE file contains the full text of the license.
+
+=cut
+
+
 package Blog::Spam::Plugin::drone;
 
 
 use strict;
 use warnings;
+
+use File::Path;
 use Net::DNS::Resolver;
 
 
@@ -72,7 +115,29 @@ sub testComment
     return "SPAM" unless ( $ip =~ /^([0-9\.]+)$/ );
 
     #
-    #  Reverse for querying.
+    #  Get the state directory which we'll use as a cache.
+    #
+    my $state = $params{ 'parent' }->getStateDir();
+    my $cdir  = $state . "/cache/drone/";
+
+    #
+    #  Is the result cached?
+    #
+    my $safe = $ip;
+    $safe =~ s/[:\.]/-/g;
+    if ( -e "$cdir/$safe" )
+    {
+        return ("SPAM:Listed in dronebl.org");
+    }
+
+
+    #
+    #  Not found in the cache.  Query DNS, then add any
+    # positive result to the cache
+    #
+
+    #
+    #  Reverse the IP for querying.
     #
     my $reversed_ip = join( ".", reverse( split( /\./, $ip ) ) );
 
@@ -85,6 +150,19 @@ sub testComment
     if ( ( defined($packet) ) &&
          ( defined( $packet->answer() ) ) )
     {
+
+        #
+        #  Cache the result
+        #
+        if ( !-d $cdir )
+        {
+            mkpath( $cdir, { verbose => 0 } );
+        }
+        open( FILE, ">", "$cdir/$safe" ) or
+          die "Failed to open $cdir/$safe - $!";
+        print FILE "\n";
+        close(FILE);
+
         return ("SPAM:dronebl");
     }
 
@@ -92,5 +170,42 @@ sub testComment
 }
 
 
+
+
+=begin doc
+
+Expire our cached drone entries once a week.
+
+=end doc
+
+=cut
+
+sub expire
+{
+    my ( $self, $parent, $frequency ) = (@_);
+
+    if ( $frequency eq "weekly" )
+    {
+        $self->{ 'verbose' } && print "Cleaning Drone Cache\n";
+
+        my $state = $parent->getStateDir();
+        my $cdir  = $state . "/cache/drone/";
+
+        foreach my $entry ( glob( $cdir . "/*" ) )
+        {
+
+            #
+            #  We're invoked once per week, but we
+            # only want to remove files which are themselves
+            # older than a week.
+            #
+            if ( -M $entry > 7 )
+            {
+                $self->{ 'verbose' } && print "\tRemoving: $entry\n";
+                unlink($entry);
+            }
+        }
+    }
+}
 
 1;

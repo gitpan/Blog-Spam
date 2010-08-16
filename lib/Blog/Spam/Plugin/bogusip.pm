@@ -1,4 +1,46 @@
 
+=head1 NAME
+
+Blog::Spam::Plugin::bogusip - Reject comments from bogus IP addresses.
+
+=cut
+
+=head1 ABOUT
+
+This plugin is designed to discard comments which have been submitted
+from "internal-only" IP addresses.
+
+In the real world such things shouldn't be seen, but since we present
+an API which is open to callers around the world we cannot control what
+details they send to us.
+
+=cut
+
+=head1 AUTHOR
+
+=over 4
+
+=item Steve Kemp
+
+http://www.steve.org.uk/
+
+=back
+
+=cut
+
+=head1 LICENSE
+
+Copyright (c) 2008-2010 by Steve Kemp.  All rights reserved.
+
+This module is free software;
+you can redistribute it and/or modify it under
+the same terms as Perl itself.
+The LICENSE file contains the full text of the license.
+
+=cut
+
+
+
 package Blog::Spam::Plugin::bogusip;
 
 
@@ -30,6 +72,15 @@ sub new
     bless( $self, $class );
     return $self;
 }
+
+
+=begin doc
+
+Return the name of this plugin.
+
+=end doc
+
+=cut
 
 sub name
 {

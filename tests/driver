@@ -1,0 +1,228 @@
+#!/usr/bin/perl -w
+#
+#  Submit one request to the localhost for each test file we find.
+#
+#  If a host:port is specified on the command line submit against that
+# instead of http://localhost:8888/
+#
+# Steve
+# --
+#
+
+
+use strict;
+use warnings;
+use Data::Dumper;
+use Getopt::Long;
+
+
+require RPC::XML;
+require RPC::XML::Client;
+
+
+#
+#  Config
+#
+my %CONFIG;
+
+#
+#  Default server
+#
+$CONFIG{ 'server' } = "http://localhost:8888/";
+
+#
+#  Result count
+#
+$CONFIG{ 'pass' } = $CONFIG{ 'fail' } = 0;
+
+
+
+#
+#  Parse our options
+#
+exit
+  if (
+       !GetOptions( "test=s",   \$CONFIG{ 'test' },
+                    "server=s", \$CONFIG{ 'server' }, ) );
+
+
+
+
+#
+#  Make sure the server is valid
+#
+if ( $CONFIG{ 'server' } !~ /^http:\/\// )
+{
+    $CONFIG{ 'server' } = "http://" . $CONFIG{ 'server' };
+}
+if ( $CONFIG{ 'server' } !~ /:([0-9]+)/ )
+{
+    $CONFIG{ 'server' } .= ":8888/";
+}
+
+
+
+#
+#  If we're using a file then test that, otherwise
+# test all files in the current directory.
+#
+if ( $CONFIG{ 'test' } )
+{
+    testTheFile( $CONFIG{ 'test' } );
+}
+else
+{
+
+    #  Process each file in the current directory
+    #
+    foreach my $file ( sort( glob("test.*") ) )
+    {
+        testTheFile($file);
+    }
+
+    #
+    #  Show pass/fail totals
+    #
+    print "PASS: $CONFIG{'pass'} FAIL: $CONFIG{'fail'}\n";
+}
+
+
+
+#
+#  All done
+#
+exit;
+
+
+
+
+=begin doc
+
+   Make a request against the RPC server with the given file providing
+ both input and the expected result - the latter coming from the filename.
+
+=end doc
+
+=cut
+
+sub testTheFile
+{
+    my ($file) = (@_);
+
+    if ( !-e $file )
+    {
+        print "File not found: $file\n";
+        return;
+    }
+
+
+    #
+    #  Params we send to the server.
+    #
+    #  Note we send "test" so that the spam isn't logged.
+    #
+    my %params = ( 'test' => '1' );
+
+    #
+    #  Read the file.
+    #
+    open( FILE, "<", $file ) or
+      die "Failed to open $file - $!";
+
+    while ( my $line = <FILE> )
+    {
+        if ( $line =~ /^IP: (.*)/i )
+        {
+            $params{ 'ip' } = $1;
+        }
+        elsif ( $line =~ /^User-Agent: (.*)/i )
+        {
+            $params{ 'agent' } = $1;
+        }
+        elsif ( $line =~ /^Email: (.*)/i )
+        {
+            $params{ 'email' } = $1;
+        }
+        elsif ( $line =~ /^Name: (.*)/i )
+        {
+            $params{ 'name' } = $1;
+        }
+        elsif ( $line =~ /^Subject: (.*)/i )
+        {
+            $params{ 'subject' } = $1;
+        }
+        elsif ( $line =~ /^Options: (.*)/i )
+        {
+            $params{ 'options' } = $1;
+        }
+        else
+        {
+            $params{ 'comment' } .= $line;
+        }
+
+    }
+    close(FILE);
+
+    #
+    #  We'll disable the bayasian filtering when testing,
+    # because that will make things unpredicatable.
+    #
+    if ( $params{'options'} )
+    {
+        $params{'options'} .= ",exclude=bayasian";
+    }
+    else
+    {
+        $params{'options'} = "exclude=bayasian";
+    }
+
+    #
+    #  The result we obtained, and we expected.
+    #
+    my $result   = undef;
+    my $expected = undef;
+
+    #
+    #  Make the result
+    #
+    eval {
+        my $client = RPC::XML::Client->new( $CONFIG{ 'server' } );
+        my $req    = RPC::XML::request->new( 'testComment', \%params );
+        my $res    = $client->send_request($req);
+        $result = $res->value();
+    };
+    if ($@)
+    {
+        print "Connection failed to $CONFIG{'server'}\n";
+        print "Or there was some other error.\n";
+        print "Aborting.\n";
+        exit;
+    }
+
+    #
+    #  See what we expected to receive.
+    #
+    $expected = "OK"   if ( $file =~ /\.ok$/i );
+    $expected = "SPAM" if ( $file =~ /\.spam$/i );
+
+    #
+    #  Did we get the result we wanted?
+    #
+    my $literal = $result;
+    $result = $1 if ( $result =~ /^([^:]+):(.*)/ );
+    $result = uc($result);
+
+    if ( $result eq $expected )
+    {
+        print "OK - $file\n";
+        $CONFIG{ 'pass' } += 1;
+    }
+    else
+    {
+        print "FAIL - $file [Expected: $expected but got $result - $literal]\n";
+        $CONFIG{ 'fail' } += 1;
+
+        print "Actual result:\n";
+        print Dumper(\$literal);
+    }
+}

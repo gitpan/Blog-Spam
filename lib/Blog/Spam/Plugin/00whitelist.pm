@@ -26,24 +26,23 @@ optional parameters may be included.  One of the optional parameters
 is a list of CIDR ranges to automatically blacklist, and always return
 a "SPAM" result from.
 
-For full details of the available options please consult http://api.blogspam.net/
-
-=cut
-
-=head1 LICENSE
-
-This code is licensed under the terms of the GNU General Public
-License, version 2.  See included file GPL-2 for details.
+The options are discussed as part of the L<Blog::Server::API>, in the
+section L<Blog::Server::API/"TESTING OPTIONS"|TESTING OPTIONS>.
 
 =cut
 
 =head1 AUTHOR
 
-Steve
---
+=over 4
+
+=item Steve Kemp
+
 http://www.steve.org.uk/
 
+=back
+
 =cut
+
 
 =head1 LICENSE
 

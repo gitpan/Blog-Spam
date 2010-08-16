@@ -1,6 +1,6 @@
 --- #YAML:1.0
 name:                Blog-Spam
-version:             0.3
+version:             0.4
 abstract:            Test blog comments for SPAM, in real-time
 license:             ~
 author:              
@@ -8,7 +8,6 @@ author:
 generated_by:        ExtUtils::MakeMaker version 6.42
 distribution_type:   module
 requires:     
-    CGI::Session:                  
     Getopt::Long:                  
     IPC::Open2:                    
     LWP::Simple:                   

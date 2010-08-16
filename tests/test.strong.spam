@@ -1,0 +1,4 @@
+IP: 11.23.21.32
+Options: exclude=rdns,exclude=badip,exclude=sfs
+
+<strong>This is not valid</strong>

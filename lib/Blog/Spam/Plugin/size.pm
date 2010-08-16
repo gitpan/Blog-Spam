@@ -10,10 +10,12 @@ Blog::Spam::Plugin::size - Size-Test submitted comments.
 This plugin is designed to discard comments which are too small, or
 too large.
 
-By defaul this plugin will do nothing - it must be explicitly enabled
+By default this plugin will do nothing - it must be explicitly enabled
 by the site which is submitting the comment for testing, via the use
-of optional parameters submitted to the L<Blog::Spam::Server> - see
-http://api.blogspam.net for details of those parameters.
+of optional parameters submitted to the L<Blog::Spam::Server>.
+
+The options are discussed as part of the L<Blog::Server::API>, in the
+section L<Blog::Server::API/"TESTING OPTIONS"|TESTING OPTIONS>.
 
 If supplied this plugin will test the submitted comment against the
 appropriate values:
@@ -21,9 +23,11 @@ appropriate values:
 =over 8
 
 =item min-size
+
 The minimum acceptible word-count for a valid comment.
 
 =item max-size
+
 The maximum acceptible word-count for a valid comment.
 
 =back
@@ -33,19 +37,15 @@ it will be rejected and marked as SPAM.
 
 =cut
 
-
-=head1 LICENSE
-
-This code is licensed under the terms of the GNU General Public
-License, version 2.  See included file GPL-2 for details.
-
-=cut
-
 =head1 AUTHOR
 
-Steve
---
+=over 4
+
+=item Steve Kemp
+
 http://www.steve.org.uk/
+
+=back
 
 =cut
 

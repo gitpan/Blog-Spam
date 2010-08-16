@@ -1,4 +1,41 @@
 
+=head1 NAME
+
+Blog::Spam::Plugin::strong - Block comments which have undue strong tags.
+
+=cut
+
+=head1 ABOUT
+
+This plugin is designed to reject comments which consist of small amounts
+of BOLD text - which has been seen in the wild as a definitive SPAM test.
+
+=cut
+
+=head1 AUTHOR
+
+=over 4
+
+=item Steve Kemp
+
+http://www.steve.org.uk/
+
+=back
+
+=cut
+
+=head1 LICENSE
+
+Copyright (c) 2008-2010 by Steve Kemp.  All rights reserved.
+
+This module is free software;
+you can redistribute it and/or modify it under
+the same terms as Perl itself.
+The LICENSE file contains the full text of the license.
+
+=cut
+
+
 
 package Blog::Spam::Plugin::strong;
 

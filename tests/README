@@ -1,0 +1,34 @@
+
+About
+-----
+
+  This directory contains a simple driver program "driver" which will
+ read each file called "test.*"
+
+  Each one will be parsed in turn and submitted to the RPC server on the
+ localhost.
+
+  The result of the RPC server will be compared to the expected result,
+ which is included in the name.
+
+  For example:
+
+    test.blah.spam  ->  Should report "SPAM".
+    test.foo.ok     ->  Should result in an "OK" reply from the RPC server.
+
+
+Testing Remotely
+----------------
+
+  The driver will default to testing locally, but may be given a host
+ on the command line:
+
+skx@gold:~/hg/blogspam/tests$ ./driver www.steve.org.uk
+
+  Or a host + port
+
+skx@gold:~/hg/blogspam/tests$ ./driver www.steve.org.uk:8888
+
+
+Steve
+--
