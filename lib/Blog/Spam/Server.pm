@@ -8,114 +8,18 @@ Blog::Spam::Server - An RPC server which detects comment spam.
 =head1 ABOUT
 
 This program implements a plugin-based XML-RPC server which may be
-queried from a number of languages.
+queried from almost all languages.
 
 The intention is that clients will query this server to detect whether
-their comment submissions are spam or genuine.
+their comment submissions are spam or genuine, using our API.
 
-Whilst it isn't likely to be amazingly comprehensive it should do
-better than simple tests are able to do locally, and the benefit
-of running your own server is that you can centralise the testing which
-is used by multiple web applications.
+The API we present is fully documented in L<Blog::Spam::API>.
 
-(Of course if you trust an external third party then you have a new
-single point of failure - thats why the server is open-source.  Run
-your own!)
+The actual testing of submitted comments is handled by a series of
+plugins, each living beneath the 'Blog::Spam::Plugin::' namespace.
 
-=cut
-
-=head1 PLUGINS
-
-The core of the server is a collection of plugins, each of which
-will be loaded dynamically from the Blog::Spam::Plugin namespace.  Please
-see L<Blog::Spam::Plugin::Sample> for available plugin documentation.
-
-Each plugin will be passed a hash of data from the client, and it
-is expected that the plugin will return a single string result:
-
-   "ok"   =>  The comment is OK, and the next plugin should be called.
-
-   "spam" =>  The comment is spam, and further plugins should be skipped.
-
-   "good" =>  The comment is good, and all further plugins should be skipped.
-
-=cut
-
-
-=head1 CALLING
-
-To call the XML-RPC server you should pass the following parameters
-in a struct:
-
-   agent   -> The user-agent of the submitting browser, if any.
-   comment -> The body of the comment
-   email   -> The email address submitted
-   ip      -> The IP the comment was submitted from.
-   name    -> The name the user chose, if any.
-
-   options -> Discussed later.
-
-The only mandatory arguments are "comment" and "IP", the rest are
-optional but may be useful and it is recommended you pass them if
-you can.
-
-The return value will either be "OK", or "SPAM".  Optionally a reason
-may be returned in the case a comment is justed as SPAM, for example:
-
-=for example begin
-
-    SPAM:I don't like comments submitted before 9AM.
-
-=for example end
-
-=cut
-
-
-=head1 OPTIONS
-
-You may pass the optional "options" string to the server, if you
-wish finer control.
-
-This option string should consist of comma-separated tokens.
-
-The permissible values are:
-
-         whitelist=1.2.3.4      -> Whitelist the given IP / CIDR range.
-         blacklist=1.2.3.4      -> Blacklist the given IP / CIDR range.
-
-         exclude=plugin         -> Don't run the plugin with name "plugin".
-
-         mandatory=subject      -> Specify the given field should always be
-                                   present.
-
-         max-links=20           -> The maximum number of URLs.
-
-         min-size=1024          -> Minimum body size.
-
-         max-size=2k            -> Maximum body size
-
-         fail                   -> Always return "spam"
-
-These options may be repeated, for example the following is a valid
-value for the "options" setting:
-
-=for example begin
-
-   mandatory=subject,mandatory=name,whitelist=1.2.3.4,exclude=surbl
-
-=for example end
-
-That example will:
-
-1.  Make the "subject" field mandatory.
-
-2.  Makes the "name" field mandatory.
-
-3.  Whitelists any comments subitted from the IP 1.2.3.4
-
-4.  Causes the server to not run the surbl test.
-
-=cut
+For a description of the plugin methods please consult the
+L<Blog::Spam::Plugin::Sample> plugin.
 
 =cut
 
@@ -125,7 +29,6 @@ This code is licensed under the terms of the GNU General Public
 License, version 2.  See included file GPL-2 for details.
 
 =cut
-
 
 =head1 AUTHOR
 
@@ -151,7 +54,7 @@ package Blog::Spam::Server;
 
 
 use vars qw($VERSION);
-our $VERSION = "0.2";
+our $VERSION = "0.3";
 
 #
 #  The modules we require
@@ -246,7 +149,7 @@ sub createServer
     #
     # Did we fail to bind?
     #
-    if ( $self->{'daemon'} )
+    if ( $self->{ 'daemon' } )
     {
         print "Failed to bind!\n";
         exit 1;
@@ -303,7 +206,7 @@ Load the plugins we might have present.
 
 sub loadPlugins
 {
-    my( $self ) = ( @_ );
+    my ($self) = (@_);
 
     #
     #  Load our plugins once.
@@ -332,20 +235,22 @@ Run any scheduled tasks.
 
 sub runTasks
 {
-    my( $self, $label ) = ( @_ );
+    my ( $self, $label ) = (@_);
 
-    $self->{'verbose'} && print "Running tasks: $label\n";
+    $self->{ 'verbose' } && print "Running tasks: $label\n";
 
-    foreach my $plugin ( @{ $self->{'plugins'} } )
+    foreach my $plugin ( @{ $self->{ 'plugins' } } )
     {
         my $name = $plugin->name();
 
-        next unless( $plugin->can( "expire" ) );
+        next unless ( $plugin->can("expire") );
 
-        $self->{'verbose'} && print "\tcalling $name\n";
+        $self->{ 'verbose' } && print "\tcalling $name\n";
+
+        $plugin->expire( $self, $label );
     }
 
-    $self->{'verbose'} && print "\tCompleted\n";
+    $self->{ 'verbose' } && print "\tCompleted\n";
 }
 
 

@@ -1,4 +1,61 @@
 
+=head1 NAME
+
+Blog::Spam::Plugin::multilinks - Reject opportunistic use of URLs.
+
+=cut
+
+=head1 ABOUT
+
+This plugin is designed to discard comments which have bodies including
+links formatted in multiple senses.
+
+A standard comment might have multiple valid URLs included in it,
+(but see L<Blog::Spam::Plugin::lotsaurls> for restricting the number
+of submitted URLs per comment, but they will all be in one format.
+
+Many SPAM comments contain links in multiple formats such as:
+
+=for example begin
+
+   [url=http://spam.example.org]SPAM[/url],
+   <a href="http://spam.example.org/">spam</a>,
+   [LINK=http://spam.example.org]SPAM[/link]
+
+=for example end
+
+THis plugin will recognise links in multiple encodings and reject
+as SPAM.
+
+=cut
+
+=head1 LICENSE
+
+This code is licensed under the terms of the GNU General Public
+License, version 2.  See included file GPL-2 for details.
+
+=cut
+
+=head1 AUTHOR
+
+Steve
+--
+http://www.steve.org.uk/
+
+=cut
+
+=head1 LICENSE
+
+Copyright (c) 2008-2010 by Steve Kemp.  All rights reserved.
+
+This module is free software;
+you can redistribute it and/or modify it under
+the same terms as Perl itself.
+The LICENSE file contains the full text of the license.
+
+=cut
+
+
 
 package Blog::Spam::Plugin::multilinks;
 

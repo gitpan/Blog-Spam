@@ -1,4 +1,47 @@
 
+=head1 NAME
+
+Blog::Spam::Plugin::requiremx - Reject email addresses to have an MX record.
+
+=cut
+
+=head1 ABOUT
+
+This plugin is designed to discard comments which have been submitted with
+an email address which has no MX record listed in DNS.
+
+B<Note>: We don't actually do anything with the MX record - we'll just
+look it up, and reject the comment if one is not found.
+
+=cut
+
+=head1 LICENSE
+
+This code is licensed under the terms of the GNU General Public
+License, version 2.  See included file GPL-2 for details.
+
+=cut
+
+=head1 AUTHOR
+
+Steve
+--
+http://www.steve.org.uk/
+
+=cut
+
+=head1 LICENSE
+
+Copyright (c) 2008-2010 by Steve Kemp.  All rights reserved.
+
+This module is free software;
+you can redistribute it and/or modify it under
+the same terms as Perl itself.
+The LICENSE file contains the full text of the license.
+
+=cut
+
+
 
 package Blog::Spam::Plugin::requiremx;
 
@@ -35,6 +78,14 @@ sub new
 }
 
 
+=begin doc
+
+Return the name of this plugin.
+
+=end doc
+
+=cut
+
 sub name
 {
     my ($self) = (@_);
@@ -45,9 +96,8 @@ sub name
 
 =begin doc
 
-If we've got an email address make sure that the domain :
-
-   a.  Has an MX record.
+If we've got an email address make sure that the domain which it is
+hosted upon has an MX record listed in DNS.
 
 =end doc
 

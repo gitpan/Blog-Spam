@@ -1,4 +1,51 @@
 
+=head1 NAME
+
+Blog::Spam::Plugin::emailtests - Reject email addresses which are bogus.
+
+=cut
+
+=head1 ABOUT
+
+This plugin is designed to discard comments if they have been submitted
+with a bogus Email address.
+
+The tests are pretty simple; just making sure that the submitted domain
+is not an example.{com org net} one, and that the mail address has an
+"@" symbol in it.
+
+In the future more thorough tests might be added, but currently email addresses
+are rarely configured to be mandatory in comment submissions so further
+work isn't a real useful way to spend time.
+
+=cut
+
+=head1 LICENSE
+
+This code is licensed under the terms of the GNU General Public
+License, version 2.  See included file GPL-2 for details.
+
+=cut
+
+=head1 AUTHOR
+
+Steve
+--
+http://www.steve.org.uk/
+
+=cut
+
+=head1 LICENSE
+
+Copyright (c) 2008-2010 by Steve Kemp.  All rights reserved.
+
+This module is free software;
+you can redistribute it and/or modify it under
+the same terms as Perl itself.
+The LICENSE file contains the full text of the license.
+
+=cut
+
 
 package Blog::Spam::Plugin::emailtests;
 
@@ -27,6 +74,16 @@ sub new
     bless( $self, $class );
     return $self;
 }
+
+
+
+=begin doc
+
+Return the name of this plugin.
+
+=end doc
+
+=cut
 
 
 sub name

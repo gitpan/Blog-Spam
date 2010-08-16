@@ -1,3 +1,4 @@
+lib/Blog/Spam/API.pm
 lib/Blog/Spam/Server.pm
 lib/Blog/Spam/Plugin/00blacklist.pm
 lib/Blog/Spam/Plugin/00whitelist.pm

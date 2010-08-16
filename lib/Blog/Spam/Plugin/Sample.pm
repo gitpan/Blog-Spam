@@ -134,7 +134,10 @@ This method is B<optional>.
 Some plugins maintain state which must be expired.
 
 If this method is implemented it will be invoked upon a regular
-frequency.  The single argument given will be one of:
+frequency.
+
+There are two arguments, the first is a handle to the L<Blog::Sample::Server>
+object, and the second is a frequency label:
 
 =over 8
 
@@ -153,7 +156,7 @@ This method has been called once per week.
 
 sub expire
 {
-    my ( $self, $duration ) = (@_);
+    my ( $self, $parent, $duration ) = (@_);
 
     if ( $duration eq "hourly" )
     {

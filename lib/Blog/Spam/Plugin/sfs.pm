@@ -34,6 +34,15 @@ sub new
     return $self;
 }
 
+
+=begin doc
+
+Return the name of this plugin.
+
+=end doc
+
+=cut
+
 sub name
 {
     my ($self) = (@_);
@@ -127,5 +136,41 @@ sub testComment
 }
 
 
+
+=begin doc
+
+Expire our cached SFS entries once a week.
+
+=end doc
+
+=cut
+
+sub expire
+{
+    my ( $self, $parent, $frequency ) = (@_);
+
+    if ( $frequency eq "weekly" )
+    {
+        $self->{ 'verbose' } && print "Cleaning Cache\n";
+
+        my $state = $parent->getStateDir();
+        my $cdir  = $state . "/cache/sfs/";
+
+        foreach my $entry ( glob( $cdir . "/*" ) )
+        {
+
+            #
+            #  We're invoked once per week, but we
+            # only want to remove files which are themselves
+            # older than a week.
+            #
+            if ( -M $entry > 7 )
+            {
+                $self->{ 'verbose' } && print "\tRemoving: $entry\n";
+                unlink($entry);
+            }
+        }
+    }
+}
 
 1;
