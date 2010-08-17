@@ -26,8 +26,8 @@ optional parameters may be included.  One of the optional parameters
 is a list of CIDR ranges to automatically blacklist, and always return
 a "SPAM" result from.
 
-The options are discussed as part of the L<Blog::Server::API>, in the
-section L<TESTING OPTIONS|Blog::Server::API/"TESTING OPTIONS">.
+The options are discussed as part of the L<Blog::Spam::API>, in the
+section L<TESTING OPTIONS|Blog::Spam::API/"TESTING OPTIONS">.
 
 =cut
 

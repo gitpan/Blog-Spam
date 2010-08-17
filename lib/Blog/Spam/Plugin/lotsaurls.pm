@@ -13,8 +13,8 @@ number of URLs.
 By default 10 URLs is the threshold, but this may be changed by the
 submitter via the optional parameters submitted to the server.
 
-The options are discussed as part of the L<Blog::Server::API>, in the
-section L<TESTING OPTIONS|Blog::Server::API/"TESTING OPTIONS">.
+The options are discussed as part of the L<Blog::Spam::API>, in the
+section L<TESTING OPTIONS|Blog::Spam::API/"TESTING OPTIONS">.
 
 All URLS are detected via the L<URI::Find> module.
 

@@ -131,10 +131,9 @@ sub testComment
 
 This method is B<optional>.
 
-Some plugins maintain state which must be expired.
-
-If this method is implemented it will be invoked upon a regular
-frequency.
+Some plugins maintain state which must be expired.   If this method is
+implemented it will be invoked upon a regular frequency, with the intention
+that a plugin may expire its state at that time.
 
 There are two arguments, the first is a handle to the L<Blog::Sample::Server>
 object, and the second is a frequency label:
@@ -166,7 +165,64 @@ sub expire
 
         # do stuff.
     }
+    elsif ( $duration eq "daily" )
+    {
+
+        # do stuff.
+    }
+    elsif ( $duration eq "weekly" )
+    {
+
+        # do stuff.
+    }
+    else
+    {
+        print "UNKOWN DURATION: $duration\n";
+    }
 }
+
+
+
+=head2 logMessage
+
+This method is B<optional>.
+
+This method will be called when the server wishes to log a result
+of a connection.  ie. It will be called once for each received comment
+at the end of the testComment function.
+
+The message structure, as submitted to testing, will be supplied as
+a hash, and this hash will contain a couple of additional keys:
+
+=over 8
+
+=item result
+
+The result of the test "OK" or "SPAM:[reson]".
+
+=item blocker
+
+If the result of the test was not "OK" then the name of the plugin
+which caused the rejection will be saved in this key.
+
+=item peer
+
+The remote IP address of the client which submitted the message
+for testing.
+
+=back
+
+=cut
+
+sub logMessage
+{
+    my ( $self, $parent, %message ) = (@_);
+
+    # NOP
+}
+
+
+
 
 1;
 

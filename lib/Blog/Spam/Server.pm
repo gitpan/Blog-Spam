@@ -51,7 +51,7 @@ package Blog::Spam::Server;
 
 
 use vars qw($VERSION);
-our $VERSION = "0.5";
+our $VERSION = "0.6";
 
 #
 #  The modules we require
@@ -516,12 +516,43 @@ sub testComment
         $struct{ 'result' } = $result
           if ( defined($result) && length($result) );
 
+
+        #
+        #  Log to disk
+        #
         $self->logMessage(%struct);
+
+        #
+        #  See if any plugin will handle the logging too.
+        #
+        foreach my $plugin ( @{ $self->{ 'plugins' } } )
+        {
+
+            #
+            #  Ignore plugins that don't implement logMessage
+            #
+            next unless ( $plugin->can("logMessage") );
+
+            #
+            #  Call any loggin plugins
+            #
+            $self->{ 'verbose' } &&
+              print "\tLogging result with " . $plugin->name . "\n";
+            $plugin->logMessage( $self, %struct );
+        }
     }
 
 
     #
-    #  Show the result to the console
+    #  OK so if we weren't testing we'll have logged
+    # the message, the result, and the blocker to
+    # a file which will get rotated out.
+    #
+    #  If we're running with --verbose we should
+    # now log a summary to the console.
+    #
+    #  Either way, verbose or not, we will log a summary
+    # to syslog.
     #
     my $time = "[" . localtime(time) . "] ";
 
@@ -529,15 +560,23 @@ sub testComment
     # Build up a message.
     #
     my $msg = "";
-    $msg .= "TEST "                if ( $struct{ 'test' } );
-    $msg .= "IP:$struct{'ip'}";
-    $msg .= " BLOCKER:" . $blocker if ($blocker);
-    $msg .= " RESULT:" . $result   if ($result);
+    $msg .= "TEST "                 if ( $struct{ 'test' } );
+    $msg .= "PEER:$struct{'peer'} ";
+    $msg .= "SITE:$struct{'site'} " if ( $struct{ 'site' } );
+    $msg .= "IP:$struct{'ip'} ";
+    $msg .= " BLOCKER:" . $blocker  if ($blocker);
+    $msg .= " RESULT:" . $result    if ($result);
 
     #
     #  Show to console if we're verbose.
     #
-    $self->{ 'verbose' } && print "\t$time $msg\n";
+    print "\t$time $msg\n" if ( $self->{ 'verbose' } );
+
+    #
+    #  But always log to syslog
+    #
+    syslog( "info|local0", $msg );
+
 
     #
     # We remap "good" to be "OK" so that we need only document

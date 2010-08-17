@@ -118,25 +118,28 @@ $CONFIG{ 'port' } = "8888";
 #
 exit
   if (
-       !GetOptions(
-                   # help options
-                   "help", \$CONFIG{'help'},
-                   "manual", \$CONFIG{'manual'},
-                   "verbose", \$CONFIG{'verbose'},
+    !GetOptions(
 
-                   "port=s",  \$CONFIG{ 'port' },
-                    "state=s", \$CONFIG{ 'state' },
-                    "hourly",  \$CONFIG{ 'hourly' },
-                    "daily",   \$CONFIG{ 'daily' },
-                    "weekly",  \$CONFIG{ 'weekly' },
-                  ) );
+        # help options
+        "help",    \$CONFIG{ 'help' },
+        "manual",  \$CONFIG{ 'manual' },
+        "verbose", \$CONFIG{ 'verbose' },
+
+        "port=s",  \$CONFIG{ 'port' },
+        "state=s", \$CONFIG{ 'state' },
+
+        # scheduler periods.
+        "hourly", sub {$CONFIG{ 'period' } = "hourly"},
+        "daily",  sub {$CONFIG{ 'period' } = "daily"},
+        "weekly", sub {$CONFIG{ 'period' } = "weekly"},
+    ) );
 
 
 #
 #  Show help if we should
 #
-pod2usage(1) if ( $CONFIG{'help'} );
-pod2usage( -verbose => 2 ) if  ( $CONFIG{'manual'} );
+pod2usage(1) if ( $CONFIG{ 'help' } );
+pod2usage( -verbose => 2 ) if ( $CONFIG{ 'manual' } );
 
 #
 #  Options we pass to the constructor.
@@ -167,26 +170,16 @@ my $t = Blog::Spam::Server->new(%opts);
 $t->loadPlugins();
 
 #
-#  If we're to run tasks do that.
+#  If we're to run tasks do that, then exit.
 #
-if ( $CONFIG{ 'hourly' } )
+if ( $CONFIG{ 'period' } )
 {
-    $t->runTasks("hourly");
-    exit;
-}
-if ( $CONFIG{ 'daily' } )
-{
-    $t->runTasks("daily");
-    exit;
-}
-if ( $CONFIG{ 'weekly' } )
-{
-    $t->runTasks("weekly");
+    $t->runTasks( $CONFIG{ 'period' } );
     exit;
 }
 
 #
-#  Force it to bind.
+#  Start out server listening upon the named port.
 #
 $t->createServer( port => $CONFIG{ 'port' } );
 
@@ -196,3 +189,8 @@ $t->createServer( port => $CONFIG{ 'port' } );
 #
 $t->runLoop();
 
+
+#
+#  Not reached
+#
+exit 0;

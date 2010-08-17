@@ -14,8 +14,8 @@ By default this plugin will do nothing - it must be explicitly enabled
 by the site which is submitting the comment for testing, via the use
 of optional parameters submitted to the L<Blog::Spam::Server>.
 
-The options are discussed as part of the L<Blog::Server::API>, in the
-section L<TESTING OPTIONS|Blog::Server::API/"TESTING OPTIONS">.
+The options are discussed as part of the L<Blog::Spam::API>, in the
+section L<TESTING OPTIONS|Blog::Spam::API/"TESTING OPTIONS">.
 
 If supplied this plugin will test the submitted comment against the
 appropriate values:

@@ -1,6 +1,6 @@
 --- #YAML:1.0
 name:                Blog-Spam
-version:             0.5
+version:             0.6
 abstract:            Test blog comments for SPAM, in real-time
 license:             ~
 author:              

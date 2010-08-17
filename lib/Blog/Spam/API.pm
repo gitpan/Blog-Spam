@@ -122,8 +122,8 @@ The getPlugins method has the following XML-RPC signature:
 This method does nothing more than return the names of each of the plugins
 which the server has loaded.
 
-These plugins are modules beneath the Blog::Server::Plugin:: namespace,
-and L<the sample plugin|Blog::Server::Plugin::Sample> provides a good
+These plugins are modules beneath the Blog::Spam::Plugin:: namespace,
+and L<the sample plugin|Blog::Spam::Plugin::Sample> provides a good
 example.
 
 =cut
