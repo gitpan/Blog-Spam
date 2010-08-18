@@ -184,10 +184,13 @@ sub expire
 {
     my ( $self, $parent, $frequency ) = (@_);
 
-    if ( $frequency eq "weekly" )
-    {
-        $self->{ 'verbose' } && print "Cleaning Drone Cache\n";
+    #
+    #  Max age of files to keep.
+    #
+    my $max = $self->{ 'age' } || 7;
 
+    if ( $frequency eq "daily" )
+    {
         my $state = $parent->getStateDir();
         my $cdir  = $state . "/cache/drone/";
 
@@ -195,14 +198,20 @@ sub expire
         {
 
             #
-            #  We're invoked once per week, but we
-            # only want to remove files which are themselves
-            # older than a week.
+            #  We're invoked once per day, but we only
+            # cleanup files older than a week.
             #
-            if ( -M $entry > 7 )
+            my $age = int( -M $entry );
+
+            if ( $age >= $max )
             {
                 $self->{ 'verbose' } && print "\tRemoving: $entry\n";
                 unlink($entry);
+            }
+            else
+            {
+                $self->{ 'verbose' } &&
+                  print "\tLeaving $entry - $age days old <= $max\n";
             }
         }
     }

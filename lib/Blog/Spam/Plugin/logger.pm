@@ -102,10 +102,13 @@ sub expire
 {
     my ( $self, $parent, $frequency ) = (@_);
 
+    #
+    #  Max age of files to keep.
+    #
+    my $max = $self->{ 'age' } || 30;
+
     if ( $frequency eq "daily" )
     {
-        $self->{ 'verbose' } && print "Cleaning log Cache\n";
-
         my $state = $parent->getStateDir();
 
         foreach my $name (qw! ok spam !)
@@ -114,14 +117,22 @@ sub expire
 
             foreach my $entry ( glob( $dir . "/*" ) )
             {
+
                 #
                 #  We're invoked once per day, but we only
                 # cleanup once a month.
                 #
-                if ( -M $entry > 30 )
+                my $age = int( -M $entry );
+
+                if ( $age >= $max )
                 {
                     $self->{ 'verbose' } && print "\tRemoving: $entry\n";
                     unlink($entry);
+                }
+                else
+                {
+                    $self->{ 'verbose' } &&
+                      print "\tLeaving $entry - $age days old <= $max\n";
                 }
             }
         }
@@ -157,7 +168,7 @@ sub logMessage
     #
     if ( $result =~ /^spam:/i )
     {
-        $result ="SPAM";
+        $result = "SPAM";
     }
 
     $result = lc($result);

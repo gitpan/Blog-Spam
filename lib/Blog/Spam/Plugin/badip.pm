@@ -20,7 +20,10 @@ The plugin handles two cases:
 
 =item A file being present with a name such as /etc/blacklist.d/1.2.3.4
 
+=item A file being present with a name such as $state/blacklist.d/1.2.3.4.
+
 =item An entry in /etc/blogspam/badips matching the incoming IP
+
 
 =back
 
@@ -160,6 +163,17 @@ sub testComment
     if ( defined($dir) && ( -e "/etc/blacklist.d/$ip" ) )
     {
         return "SPAM:badip:/etc/blacklist.d/$ip";
+    }
+
+
+    #
+    #  Get our state directory.
+    #
+    my $state = $params{ 'parent' }->getStateDir();
+    my $cdir  = $state . "/blacklist.d/";
+    if ( -d $cdir && -e "$cdir/$ip" )
+    {
+        return "SPAM:badip:state/blacklist.d/$ip";
     }
 
     #

@@ -57,6 +57,7 @@ use strict;
 use warnings;
 
 
+use Fcntl qw(:flock);
 use File::Path qw/mkpath/;
 use IPC::Open2;
 
@@ -159,6 +160,12 @@ sub testComment
     my $comment = $params{ 'comment' } || "";
 
     #
+    #  Create a lock
+    #
+    open( FILE, ">", $db . ".lock" );
+    flock( FILE, LOCK_EX );
+
+    #
     #  Open the command for reading/writing.
     #
     my ( $chld_out, $chld_in );
@@ -190,6 +197,12 @@ sub testComment
     #  Wait for the process to finish
     #
     waitpid $pid, 0;
+
+    #
+    #  Unlock
+    #
+    flock( FILE, LOCK_UN );
+    close(FILE);
 
     #
     #  We'll not count an "unsure" result, so we're either

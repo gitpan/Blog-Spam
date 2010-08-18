@@ -179,7 +179,7 @@ sub testComment
 
 =begin doc
 
-Expire our cached SFS entries once a week.
+Expire any cached SFS entries older than 7 days.
 
 =end doc
 
@@ -189,10 +189,16 @@ sub expire
 {
     my ( $self, $parent, $frequency ) = (@_);
 
-    if ( $frequency eq "weekly" )
-    {
-        $self->{ 'verbose' } && print "Cleaning SFS Cache\n";
+    #
+    #  Max age of files to keep.
+    #
+    my $max = $self->{ 'age' } || 7;
 
+    #
+    #  We're only interested in being called daily.
+    #
+    if ( $frequency eq "daily" )
+    {
         my $state = $parent->getStateDir();
         my $cdir  = $state . "/cache/sfs/";
 
@@ -200,14 +206,20 @@ sub expire
         {
 
             #
-            #  We're invoked once per week, but we
-            # only want to remove files which are themselves
-            # older than a week.
+            #  We're invoked once per day, but we only care about files
+            # older than 7 days.
             #
-            if ( -M $entry > 7 )
+            my $age = int( -M $entry );
+
+            if ( $age >= $max )
             {
                 $self->{ 'verbose' } && print "\tRemoving: $entry\n";
                 unlink($entry);
+            }
+            else
+            {
+                $self->{ 'verbose' } &&
+                  print "\tLeaving $entry - $age days old <= $max\n";
             }
         }
     }

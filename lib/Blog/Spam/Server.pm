@@ -51,7 +51,7 @@ package Blog::Spam::Server;
 
 
 use vars qw($VERSION);
-our $VERSION = "0.7";
+our $VERSION = "0.8";
 
 #
 #  The modules we require
@@ -280,11 +280,12 @@ sub runTasks
         #
         #  Call plugin.
         #
-        $self->{ 'verbose' } && print "\tcalling $name\n";
+        $self->{ 'verbose' } && print "$name - starting\n";
         $plugin->expire( $self, $label );
+        $self->{ 'verbose' } && print "$name - done\n";
     }
 
-    $self->{ 'verbose' } && print "\tAll registered tasks executed.\n";
+    $self->{ 'verbose' } && print "All registered scheduler tasks executed.\n";
 }
 
 

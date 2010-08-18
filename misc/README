@@ -13,7 +13,6 @@ init.script
 Unix account named s-blogspam, as the daemon is started under that UID
 and in that home directory.
 
-
 crontab
 -------
 
@@ -21,4 +20,13 @@ A script which will schedule maintainance, and which again relies upon
 a local s-blogspam user.
 
 
+mark.cgi
+--------
 
+When installed appropriately this will allow you to view the comments
+which were marked as "OK" - if a comment is obviously spam you can
+click "spam" and the IP that submitted it will be blacklisted as a spam
+source.
+
+Do this every few days and you can stop new blogspam outbreaks from
+that source :)
