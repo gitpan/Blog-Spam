@@ -10,11 +10,15 @@ Blog::Spam::Plugin::multilinks - Reject opportunistic use of URLs.
 This plugin is designed to discard comments which have bodies including
 links formatted in multiple senses.
 
-A standard comment might have multiple valid URLs included in it,
-(but see L<Blog::Spam::Plugin::lotsaurls> for restricting the number
-of submitted URLs per comment, but they will all be in one format.
+A typical comment might have multiple URLs included in it, (but see
+L<Blog::Spam::Plugin::lotsaurls> for restricting the maximum number
+of submitted URLs per comment), but each will be in the same format.
 
-Many SPAM comments contain links in multiple formats such as:
+Many SPAM comments contain links in multiple formats, because they're
+submitted en masse and the submitter doesn't know what formatting
+type to use.
+
+This leads to comments with contents such as:
 
 =for example begin
 
@@ -24,8 +28,8 @@ Many SPAM comments contain links in multiple formats such as:
 
 =for example end
 
-THis plugin will recognise links in multiple encodings and reject
-as SPAM.
+This plugin will recognise links have been submitted in multiple
+formats and reject them as SPAM.
 
 =cut
 

@@ -71,7 +71,7 @@ keys:
    name    - The name the user chose, if any.
    subject - The subject the user chose, if any.
 
-   options - Discussed in L<TESTING OPTIONS|/"TESTING OPTIONS">.
+   options - Discussed in the section L<TESTING OPTIONS|Blog::Spam::API/"TESTING OPTIONS">.
 
 The only mandatory arguments are "comment" and "ip", the rest are
 optional but may be useful and it is recommended you pass them if

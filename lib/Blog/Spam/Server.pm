@@ -51,7 +51,7 @@ package Blog::Spam::Server;
 
 
 use vars qw($VERSION);
-our $VERSION = "0.6";
+our $VERSION = "0.7";
 
 #
 #  The modules we require
@@ -103,11 +103,6 @@ sub new
     {
         $self->{ lc $key } = $supplied{ $key };
     }
-
-    #
-    #  Spam ID.
-    #
-    $self->{ 'id' } = 0;
 
     #
     #  Open syslog
@@ -342,7 +337,16 @@ sub testComment
         $self->{ 'verbose' } &&
           print "Connection from " . $struct{ 'peer' } . "\n";
 
+    }
 
+
+
+    #
+    #  If we've got an IPv6 prefix remove it.
+    #
+    if ( $struct{ 'ip' } && ( $struct{ 'ip' } =~ /^::ffff:(.*)/i ) )
+    {
+        $struct{ 'ip' } = $1;
     }
 
     #
@@ -518,9 +522,9 @@ sub testComment
 
 
         #
-        #  Log to disk
+        #  Bump the statistics for the appropriate domain.
         #
-        $self->logMessage(%struct);
+        $self->bumpStats(%struct);
 
         #
         #  See if any plugin will handle the logging too.
@@ -684,13 +688,13 @@ sub getPlugins
 
 =begin doc
 
-  Log the single message located in the structure to disk.
+Increase the global and per-domain SPAM/OK stats.
 
 =end doc
 
 =cut
 
-sub logMessage
+sub bumpStats
 {
     my ( $self, %struct ) = (@_);
 
@@ -741,44 +745,6 @@ sub logMessage
         $self->increaseCount( $dir . "/$site/count" );
     }
 
-
-    #
-    #  OK so at this point we've increased the SPAM/OK count
-    # both globally and for the specific site.
-    #
-    #  Now we want to log the message itself.
-    #
-
-    #
-    #  The directory we write to.
-    #
-    my $dir = $state . "/" . "logs/";
-    mkpath( $dir, { verbose => 0 } ) unless ( -d $dir );
-
-    #
-    #  Make sure the filename doesn't have any bogus characters
-    # in it.
-    #
-    my $file = $struct{ 'ip' } . "." . $self->{ 'id' } . ".$$";
-    $file =~ s/[^a-zA-Z0-9]/_/g;
-    $file = $dir . $file;
-
-    #
-    #  Bump our ID
-    #
-    $self->{ 'id' } += 1;
-
-    open( LOG, ">", $file );
-    foreach my $key ( sort keys %struct )
-    {
-        if ( $key !~ /^(comment|parent)$/i )
-        {
-            print LOG "$key: " . $struct{ $key } . "\n";
-        }
-    }
-    print LOG "\n";
-    print LOG $struct{ 'comment' } . "\n";
-    close(LOG);
 }
 
 
@@ -877,7 +843,7 @@ sub getStateDir
     my @user = getpwnam("s-blogspam");
     if (@user)
     {
-        return ( $user[7] . "/" );
+        return ( $user[7] . "/state/" );
     }
     else
     {

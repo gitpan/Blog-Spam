@@ -10,6 +10,8 @@ Blog::Spam::Plugin::Sample - A sample plugin.
 This is a sample plugin which is designed to demonstrate the functionality
 which a plugin may implement to be usefully called by L<Blog::Spam::Server>.
 
+As this is just an example plugin it does nothing useful.
+
 =cut
 
 =head1 OVERVIEW
@@ -21,6 +23,9 @@ These incoming comments, and associated meta-data, will be examined
 by each known plugin in turn.  If a single plugin determines the comment
 is SPAM then all further testing is ceased.
 
+This module is an example of one such plugin, and when the server is
+installed it will be called in order, along with any others.
+
 =cut
 
 
@@ -29,8 +34,18 @@ is SPAM then all further testing is ceased.
 For a plugin to be loaded it must live beneath the L<Blog::Spam::Plugin>
 namespace.
 
-There are two mandatory methods ("new" + "name"), and two optional methods
-("testComment", "expire").
+There are two mandatory methods which must be implemented ("new" + "name"),
+three optional methods ("testComment", "expire", "logMessage").
+
+The B<new> and B<name> methods are required for the plugin loading to
+succeed - the latter three optional methods are invoked at various points.
+
+For example the B<testComment> method will be called to test the state
+of an incoming comment "SPAM" or "OK".  The B<expire> method will be
+called periodically, if available, to carry out house-keeping tasks.
+
+Finally the B<logMessage> method will be invoked, when implemented,
+when the server has decided whether a message is SPAM or OK.
 
 =cut
 
@@ -47,9 +62,7 @@ use warnings;
 =head2 new
 
 This method is called when the server is started, and all plugins
-are loaded.
-
-This method is B<mandatory>.
+are loaded.   This method is mandatory.
 
 =cut
 
@@ -74,9 +87,8 @@ sub new
 
 =head2 name
 
-Return the name of this plugin.
-
-This method is B<mandatory>.
+Return the name of this plugin.  This method is mandatory.  (To allow
+the server to sort plugin names, and thus call them in order.)
 
 =cut
 
@@ -91,7 +103,13 @@ sub name
 =head2 testComment
 
 This method is invoked upon the reception of an incoming comment to
-test.  It is given a hash of options, with notable keys including:
+test.
+
+The arguments are a pointer to the server object, and a hash of values
+read from the remote client.  (These remote keys include such things
+as the IP address of the comment submitter, their name, their email
+address and the comment itself.  For a full list please consult
+L<Blog::Spam::API>.)
 
 =over 8
 
@@ -129,13 +147,11 @@ sub testComment
 
 =head2 expire
 
-This method is B<optional>.
-
 Some plugins maintain state which must be expired.   If this method is
 implemented it will be invoked upon a regular frequency, with the intention
 that a plugin may expire its state at that time.
 
-There are two arguments, the first is a handle to the L<Blog::Sample::Server>
+There are two arguments, the first is a handle to the L<Blog::Spam::Server>
 object, and the second is a frequency label:
 
 =over 8
@@ -189,7 +205,7 @@ This method is B<optional>.
 
 This method will be called when the server wishes to log a result
 of a connection.  ie. It will be called once for each received comment
-at the end of the testComment function.
+at the end of the B<testComment> function.
 
 The message structure, as submitted to testing, will be supplied as
 a hash, and this hash will contain a couple of additional keys:
