@@ -58,20 +58,43 @@ The testComment method has the following XML-RPC signature:
 
 =for example end
 
-(This means the method takes a "struct" as an argument, and returns
-a string.  In Perl terms the struct is a hash.)
+This means the method takes a "struct" as an argument, and returns
+a string.  In Perl terms the struct is a hash.
 
 When calling this method the hash of options may contain the following
 keys:
 
-   agent   - The user-agent of the submitting browser, if any.
-   comment - The body of the comment
-   email   - The email address submitted
-   ip      - The IP the comment was submitted from.
-   name    - The name the user chose, if any.
-   subject - The subject the user chose, if any.
+=over 8
 
-   options - Discussed in the section L<TESTING OPTIONS|Blog::Spam::API/"TESTING OPTIONS">.
+=item agent
+The user-agent of the submitting browser, if any.
+
+=item comment
+The body of the comment
+
+=item email
+The email address submitted along with the comment.
+
+=item fail
+If this key is present your comment will always be returned as SPAM; useful
+for testing if nothing else.  This handling is implemented by L<Blog::Spam::Plugin::fail>.
+
+=item ip
+The IP address the comment was submitted from.
+
+=item name
+The name the user chose, if any.
+
+=item subject
+The subject the user chose, if any.
+
+=item site
+A HTTP link to I<your> site.  (Use $ENV{'SERVER_NAME'} if possible.)
+
+=item options
+Customization options for the testing process, discussed in the section L<TESTING OPTIONS|Blog::Spam::API/"TESTING OPTIONS">.
+
+=back
 
 The only mandatory arguments are "comment" and "ip", the rest are
 optional but may be useful and it is recommended you pass them if
@@ -88,7 +111,6 @@ SPAM, for example:
 
 =for example end
 
-
 =cut
 
 =head2 classifyComment
@@ -102,8 +124,21 @@ The classifyComment method has the following XML-RPC signature:
 
 =for example end
 
-(This means the method takes a "struct" as an argument, and returns
-a string.  In Perl terms the struct is a hash.)
+This means the method takes a "struct" as an argument, and returns
+a string.  In Perl terms the struct is a hash.
+
+The keys to this method are identical to those in the testComment
+method - the only difference is that the "train" key is mandatory:
+
+=over 8
+
+=item train
+Either "ok" or "spam" to train the comment appopriately.
+
+=back
+
+If the comment was permitted to pass, but should have been rejected
+as SPAM set the train parameter to "spam".
 
 =cut
 
@@ -117,7 +152,7 @@ The getPlugins method has the following XML-RPC signature:
 
 =for example end
 
-(This means the method takes no arguments, and returns an array.)
+This means the method takes no arguments, and returns an array.
 
 This method does nothing more than return the names of each of the plugins
 which the server has loaded.
@@ -138,11 +173,14 @@ The getStats method has the following XML-RPC signature:
 
 =for example end
 
-(This method returns a struct and takes a string as its only argument.)
+This method returns a struct and takes a string as its only argument.
 
 This method returns a hash containing two keys "OK" and "SPAM".  These
 keys will have statistics for the given domain - or global statistics
 if the method is passed a zero-length string.
+
+B<Note:> The string here should match that given as the "site" key to the method
+testComment - as that is how sites are identified.
 
 =cut
 

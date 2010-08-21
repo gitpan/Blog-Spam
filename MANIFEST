@@ -25,7 +25,6 @@ lib/Blog/Spam/Plugin/wordcount.pm
 lib/Blog/Spam/Server.pm
 t/drone-expiry.t
 t/httpbl-expiry.t
-t/name-test.t
 t/log-expiry.t
 t/sfs-expiry.t
 tests/README

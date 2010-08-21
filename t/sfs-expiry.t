@@ -1,4 +1,12 @@
 #!/usr/bin/perl
+#
+#  Test that the stopforumspam  plugin will expire its cache
+# correctly.
+#
+# Steve
+# --
+#
+
 
 use strict;
 use warnings;

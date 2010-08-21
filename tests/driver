@@ -167,13 +167,13 @@ sub testTheFile
     #  We'll disable the bayasian filtering when testing,
     # because that will make things unpredicatable.
     #
-    if ( $params{'options'} )
+    if ( $params{ 'options' } )
     {
-        $params{'options'} .= ",exclude=bayasian";
+        $params{ 'options' } .= ",exclude=bayasian";
     }
     else
     {
-        $params{'options'} = "exclude=bayasian";
+        $params{ 'options' } = "exclude=bayasian";
     }
 
     #
@@ -223,6 +223,6 @@ sub testTheFile
         $CONFIG{ 'fail' } += 1;
 
         print "Actual result:\n";
-        print Dumper(\$literal);
+        print Dumper( \$literal );
     }
 }

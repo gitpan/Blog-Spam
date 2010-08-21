@@ -1,4 +1,11 @@
 #!/usr/bin/perl
+#
+#  Test that the logging plugin will expire its cache
+# correctly.
+#
+# Steve
+# --
+#
 
 use strict;
 use warnings;

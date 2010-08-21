@@ -51,7 +51,7 @@ package Blog::Spam::Server;
 
 
 use vars qw($VERSION);
-our $VERSION = "0.8";
+our $VERSION = "0.9";
 
 #
 #  The modules we require
@@ -135,6 +135,8 @@ sub createServer
     $options{ 'port' } = $params{ 'port' } || 8888;
     $options{ 'host' } = $params{ 'host' } if ( $params{ 'host' } );
 
+    $self->{ 'verbose' } && print "Creating RPC server.\n";
+
     #
     # Create the server object.
     #
@@ -143,12 +145,14 @@ sub createServer
     #
     # Did we fail to bind?
     #
-    if ( !$self->{ 'daemon' } )
+    if ( ( !$self->{ 'daemon' } ) ||
+         ( !$self->{ 'daemon' }->can("add_method") ) )
     {
-        print "Failed to bind!\n";
-        exit 1;
+        print "ERROR: Failed to bind!\n";
+        return undef;
     }
 
+    $self->{ 'verbose' } && print "Adding RPC methods.\n";
 
     #
     # Add our 'testComment' method.
@@ -186,13 +190,16 @@ sub createServer
           code      => sub {$self->getPlugins(@_)}
         } );
 
-    $self->{ 'verbose' } && print "Added RPC methods\n";
 }
+
 
 
 =begin doc
 
 Load the plugins we might have present.
+
+The return value to this method will be the number of plugins which
+were successfully loaded.
 
 =end doc
 
@@ -202,8 +209,13 @@ sub loadPlugins
 {
     my ($self) = (@_);
 
+    $self->{ 'verbose' } && print "Loading plugins.\n";
+
+    my $count = 0;
+
     #
-    #  Load our plugins once.
+    #  Load our plugins, passing allong the verbosity
+    # value.
     #
     my @plugins = $self->plugins( verbose => $self->{ 'verbose' } );
 
@@ -218,38 +230,37 @@ sub loadPlugins
         #
         #  Make sure the exported method is there.
         #
-        if ( $plugin->can("name") )
-        {
-            push( @valid, $plugin );
-        }
-        else
-        {
-
-            #
-            #  Hrm.  This works ..
-            #
-            #  TODO: See if we can drop name() globally.
-            #
-            #  TODO: Module::Pluggable doesn't seem to mention "name".
-            #
-            #
-            print
-              "WARNING: Ignoring plugin which doesn't implement 'sub name(){ ..};'\n";
-            print "Plugin was $plugin->{'name'}\n";
-        }
+        push( @valid, $plugin );
+        $count += 1;
     }
+
 
     #
     #  Sort by name.
     #
-    my @sorted = map {$_->[0]}
-      sort {$a->[1] cmp $b->[1]}
-      map {[$_, ( $_->name() )]} @valid;
+    if ($count)
+    {
+        my @sorted = map {$_->[0]}
+          sort {$a->[1] cmp $b->[1]}
+          map {[$_, ( ref $_ )]} @valid;
+
+        #
+        #  Squirrel them away for invokation later.
+        #
+        @{ $self->{ 'plugins' } } = @sorted;
+    }
+    else
+    {
+        print
+          "ERROR: Failed to load any plugins from Blog::Spam::Plugin namespace\n";
+    }
+
 
     #
-    #  Squirrel them away for invokation later.
+    #  Return the count.
     #
-    @{ $self->{ 'plugins' } } = @sorted;
+    $self->{ 'verbose' } && print "Loaded $count plugins\n";
+    return ($count);
 }
 
 
@@ -257,6 +268,17 @@ sub loadPlugins
 =begin doc
 
 Run any scheduled tasks.
+
+It is assumed this method will be called from cron.  Something like:
+
+=for example begin
+
+  my $server = Blog::Spam::Server->new()
+  $server->loadPlugins();
+  $server->runTasks( "daily" );
+  exit 0;
+
+=for example end
 
 =end doc
 
@@ -274,7 +296,7 @@ sub runTasks
         #
         #  Ignore plugins which don't implement an 'expire' method.
         #
-        my $name = $plugin->name();
+        my $name = ref $plugin;
         next unless ( $plugin->can("expire") );
 
         #
@@ -303,6 +325,15 @@ sub runLoop
 {
     my ($self) = (@_);
 
+    $self->{ 'verbose' } && print "Starting server loop\n";
+
+    if ( ( !$self->{ 'daemon' } ) ||
+         ( !$self->{ 'daemon' }->can("add_method") ) )
+    {
+        print "ERROR: Server not loaded!\n";
+        return undef;
+    }
+
     $self->{ 'daemon' }->server_loop();
 
 }
@@ -326,7 +357,19 @@ sub testComment
     #  The parameters the user submitted, as a hash so
     # they're easy to work with.
     #
-    my %struct = %$struct;
+    my %struct;
+
+
+    #
+    #  Copy each supplied value to the struct we'll use
+    # from here on in - but lower-case the key-names.
+    #
+    foreach my $key ( keys %$struct )
+    {
+        my $lkey = lc($key);
+
+        $struct{ $lkey } = $struct->{ $key };
+    }
 
     #
     #  Log the peer.
@@ -374,7 +417,10 @@ sub testComment
     #
     foreach my $option ( split( /,/, $options ) )
     {
-        if ( $option =~ /mandatory=(.*)/i )
+        $option =~ s/^\s+|\s+$//g;
+        next unless ( length($option) );
+
+        if ( $option =~ /^mandatory=(.*)/i )
         {
             my $key = $1;
 
@@ -384,7 +430,7 @@ sub testComment
                 return "SPAM:Missing $key";
             }
         }
-        if ( $option =~ /exclude=(.*)/i )
+        if ( $option =~ /^exclude=(.*)/i )
         {
             $skip{ $1 } = 1;
         }
@@ -413,7 +459,7 @@ sub testComment
         #
         #  The name of the plugin
         #
-        my $name = $plugin->name();
+        my $name = ref $plugin;
 
 
         my $skipThis = 0;
@@ -493,7 +539,7 @@ sub testComment
         #
         if ( $result =~ /^spam:/i )
         {
-            $blocker = $plugin->name();
+            $blocker = ref $plugin;
             if ( $blocker =~ /(.*)::(.*)/ )
             {
                 $blocker = $2;
@@ -542,7 +588,7 @@ sub testComment
             #  Call any loggin plugins
             #
             $self->{ 'verbose' } &&
-              print "\tLogging result with " . $plugin->name . "\n";
+              print "\tLogging result with " . ref $plugin . "\n";
             $plugin->logMessage( $self, %struct );
         }
     }
@@ -674,7 +720,7 @@ sub getPlugins
 
     foreach my $plugin ( sort $self->plugins() )
     {
-        my $name = $plugin->name() || $plugin;
+        my $name = ref $plugin || $plugin;
 
         if ( $name =~ /::([^:]+)$/ )
         {

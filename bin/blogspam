@@ -167,7 +167,7 @@ my $t = Blog::Spam::Server->new(%opts);
 #
 #  Load our plugins
 #
-$t->loadPlugins();
+$t->loadPlugins() || exit;
 
 #
 #  If we're to run tasks do that, then exit.
@@ -181,13 +181,13 @@ if ( $CONFIG{ 'period' } )
 #
 #  Start out server listening upon the named port.
 #
-$t->createServer( port => $CONFIG{ 'port' } );
+$t->createServer( port => $CONFIG{ 'port' } ) || exit;
 
 
 #
 #  Fire her up
 #
-$t->runLoop();
+$t->runLoop() || exit;
 
 
 #

@@ -31,7 +31,7 @@ their server they would thus submit a comment like this:
 =for example begin
 
     Subject: drop-me 1.2.3.4 please?
-    Comment: ANy comment here.
+    Comment: Any comment here.
 
 =for example end
 
@@ -68,8 +68,6 @@ package Blog::Spam::Plugin::dropme;
 
 Constructor.  Called when this plugin is instantiated.
 
-This merely saves away the name of our plugin.
-
 =end doc
 
 =cut
@@ -80,28 +78,12 @@ sub new
     my $class = ref($proto) || $proto;
 
     my $self = {};
-    $self->{ 'name' } = $proto;
 
     # verbose?
     $self->{ 'verbose' } = $supplied{ 'verbose' } || 0;
 
     bless( $self, $class );
     return $self;
-}
-
-
-=begin doc
-
-Return the name of this plugin.
-
-=end doc
-
-=cut
-
-sub name
-{
-    my ($self) = (@_);
-    return ( $self->{ 'name' } );
 }
 
 
@@ -120,25 +102,13 @@ sub testComment
 {
     my ( $self, %params ) = (@_);
 
-    my $subject = $params{ 'subject' };
-    my $ip      = $params{ 'ip' };
+    my $subject = $params{ 'subject' } || undef;
+    my $ip      = $params{ 'ip' }      || undef;
 
     #
-    #  Is there an option "fail" ?
+    #  No subject?  No IP?  Then we ignore.
     #
-    my $options = $params{ 'options' } || "";
-    foreach my $option ( split( /,/, $options ) )
-    {
-        if ( $option =~ /^fail$/i )
-        {
-            return ("SPAM:Manual Fail");
-        }
-    }
-
-    #
-    #  No subject?  Not going to be marked as spam by this plugin.
-    #
-    return "OK" if ( !defined($subject) );
+    return "OK" if ( !defined($subject) || !defined($ip) );
 
     #
     #  If the subject contains "drop-me" *and* the IP then it is spam.

@@ -34,11 +34,11 @@ installed it will be called in order, along with any others.
 For a plugin to be loaded it must live beneath the L<Blog::Spam::Plugin>
 namespace.
 
-There are two mandatory methods which must be implemented ("new" + "name"),
-three optional methods ("testComment", "expire", "logMessage").
+There are only a single mandatory method which must be implemented ("new"),
+and three optional methods ("testComment", "expire", "logMessage").
 
-The B<new> and B<name> methods are required for the plugin loading to
-succeed - the latter three optional methods are invoked at various points.
+The B<new> method is required for the plugin loading to succeed - the latter
+three optional methods are invoked at various points.
 
 For example the B<testComment> method will be called to test the state
 of an incoming comment "SPAM" or "OK".  The B<expire> method will be
@@ -73,29 +73,12 @@ sub new
 
     my $self = {};
 
-    # plugin name
-    $self->{ 'name' } = $proto;
 
     # verbose?
     $self->{ 'verbose' } = $supplied{ 'verbose' } || 0;
 
     bless( $self, $class );
     return $self;
-}
-
-
-
-=head2 name
-
-Return the name of this plugin.  This method is mandatory.  (To allow
-the server to sort plugin names, and thus call them in order.)
-
-=cut
-
-sub name
-{
-    my ($self) = (@_);
-    return ( $self->{ 'name' } );
 }
 
 

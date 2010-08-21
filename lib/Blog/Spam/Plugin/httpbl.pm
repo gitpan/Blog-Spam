@@ -64,8 +64,6 @@ use Socket;
 
 Constructor.  Called when this plugin is instantiated.
 
-This merely saves away the name of our plugin.
-
 =end doc
 
 =cut
@@ -76,28 +74,12 @@ sub new
     my $class = ref($proto) || $proto;
 
     my $self = {};
-    $self->{ 'name' } = $proto;
 
     # verbose?
     $self->{ 'verbose' } = $supplied{ 'verbose' } || 0;
 
     bless( $self, $class );
     return $self;
-}
-
-
-=begin doc
-
-Return the name of this plugin.
-
-=end doc
-
-=cut
-
-sub name
-{
-    my ($self) = (@_);
-    return ( $self->{ 'name' } );
 }
 
 
@@ -139,6 +121,17 @@ sub testComment
     $safe =~ s/[:\.]/-/g;
     if ( -e "$cdir/$safe" )
     {
+
+        #
+        #  Update the modification time so that it
+        # persists longer than the expected time since
+        # we've had a fresh hit.
+        #
+        $self->touchCache("$cdir/$safe");
+
+        #
+        #  Return the cached result
+        #
         return ("SPAM:Cached from HTTP;bl");
     }
 
@@ -196,16 +189,40 @@ sub testComment
     {
         mkpath( $cdir, { verbose => 0 } );
     }
-    open( FILE, ">", "$cdir/$safe" ) or
-      die "Failed to open $cdir/$safe - $!";
-    print FILE "\n";
-    close(FILE);
+
+    #
+    #  Save in the cache.
+    #
+    $self->touchCache("$cdir/$safe");
 
     #
     #  Return spam result
     #
     return ("SPAM:Listed in HTTP;bl");
 }
+
+
+
+
+=begin doc
+
+Create/Update the mtime of a file in the cache
+directory.
+
+=end doc
+
+=cut
+
+sub touchCache
+{
+    my ( $self, $file ) = (@_);
+
+    open( FILE, ">", $file ) or
+      return;
+    print FILE "\n";
+    close(FILE);
+}
+
 
 
 

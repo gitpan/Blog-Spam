@@ -71,8 +71,6 @@ use warnings;
 
 Constructor.  Called when this plugin is instantiated.
 
-This merely saves away the name of our plugin.
-
 =end doc
 
 =cut
@@ -83,7 +81,6 @@ sub new
     my $class = ref($proto) || $proto;
 
     my $self = {};
-    $self->{ 'name' } = $proto;
 
     # verbose?
     $self->{ 'verbose' } = $supplied{ 'verbose' } || 0;
@@ -91,22 +88,6 @@ sub new
     bless( $self, $class );
     return $self;
 }
-
-
-=begin doc
-
-Return the name of this plugin.
-
-=end doc
-
-=cut
-
-sub name
-{
-    my ($self) = (@_);
-    return ( $self->{ 'name' } );
-}
-
 
 =begin doc
 

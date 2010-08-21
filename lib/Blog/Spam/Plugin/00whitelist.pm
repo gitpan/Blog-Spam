@@ -11,11 +11,11 @@ This plugin is designed to automatically accept comments which have been
 submitted from known-good IP addresses.
 
 This plugin allows the XML-RPC connection which arrived to contain the
-whitelisted IP addresses - it doesn't whitelist addresses which are
-recorded upon the server this code is running upon.
+whitelisted IP addresses and also will compare IP addresses to a server-wide
+whitelist file.
 
-There is also a locally tested file which is consulted for a list of
-IP addresses, which is /etc/blogspam/goodips.
+B<Note>: The server administrator is responsible for populating the
+global whitelist file (/etc/blogspam/goodips).
 
 =cut
 
@@ -23,8 +23,8 @@ IP addresses, which is /etc/blogspam/goodips.
 
 When an incoming comment is submitted for SPAM detection a number of
 optional parameters may be included.  One of the optional parameters
-is a list of CIDR ranges to automatically blacklist, and always return
-a "SPAM" result from.
+is a list of CIDR ranges to automatically whitelist, which will always
+receive an "OK" result from.
 
 The options are discussed as part of the L<Blog::Spam::API>, in the
 section L<TESTING OPTIONS|Blog::Spam::API/"TESTING OPTIONS">.
@@ -66,8 +66,6 @@ use Net::CIDR::Lite;
 
 Constructor.  Called when this plugin is instantiated.
 
-This merely saves away the name of our plugin.
-
 =end doc
 
 =cut
@@ -78,26 +76,15 @@ sub new
     my $class = ref($proto) || $proto;
 
     my $self = {};
-    $self->{ 'name' } = $proto;
 
-    # blacklist file.
+    # whitelist file.
     $self->{ 'whitelist-file' } = "/etc/blogspam/goodips";
-
-    # blacklist dir.
-    $self->{ 'whitelist-dir' } = "/etc/whitelist.d/";
 
     # verbose?
     $self->{ 'verbose' } = $supplied{ 'verbose' } || 0;
 
     bless( $self, $class );
     return $self;
-}
-
-
-sub name
-{
-    my ($self) = (@_);
-    return ( $self->{ 'name' } );
 }
 
 
@@ -145,7 +132,7 @@ sub testComment
     #
     #  Now look for a local whitelist file.
     #
-    my $file = $self->{ 'blacklist-file' } || undef;
+    my $file = $self->{ 'whitelist-file' } || undef;
 
     #
     #  If there is no list then we cannot block.
@@ -169,7 +156,7 @@ sub testComment
         $self->{ 'gips' } = undef;
 
         $self->{ 'verbose' } &&
-          print $self->name() . ": re-reading whitelist file $file\n";
+          print "re-reading whitelist file $file\n";
 
         if ( open( IPS, "<", $file ) )
         {

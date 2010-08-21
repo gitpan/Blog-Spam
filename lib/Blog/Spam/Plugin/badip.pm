@@ -70,8 +70,6 @@ use warnings;
 
 Constructor.  Called when this plugin is instantiated.
 
-This merely saves away the name of our plugin.
-
 =end doc
 
 =cut
@@ -82,9 +80,6 @@ sub new
     my $class = ref($proto) || $proto;
 
     my $self = {};
-
-    # plugin name
-    $self->{ 'name' } = $proto;
 
     # blacklist file.
     $self->{ 'blacklist-file' } = "/etc/blogspam/badips";
@@ -97,22 +92,6 @@ sub new
 
     bless( $self, $class );
     return $self;
-}
-
-
-
-=begin doc
-
-Return the name of this plugin.
-
-=end doc
-
-=cut
-
-sub name
-{
-    my ($self) = (@_);
-    return ( $self->{ 'name' } );
 }
 
 
@@ -160,9 +139,9 @@ sub testComment
     #
     my $dir = $self->{ 'backlist-dir' } || undef;
 
-    if ( defined($dir) && ( -e "/etc/blacklist.d/$ip" ) )
+    if ( defined($dir) && ( -e "$dir/$ip" ) )
     {
-        return "SPAM:badip:/etc/blacklist.d/$ip";
+        return "SPAM:badip:$dir/$ip";
     }
 
 
@@ -203,7 +182,7 @@ sub testComment
         $self->{ 'ips' } = undef;
 
         $self->{ 'verbose' } &&
-          print $self->name() . ": re-reading blacklist file $file\n";
+          print "re-reading blacklist file $file\n";
 
         if ( open( IPS, "<", $file ) )
         {

@@ -53,8 +53,6 @@ use URI::Find;
 
 Constructor.  Called when this plugin is instantiated.
 
-This merely saves away the name of our plugin.
-
 =end doc
 
 =cut
@@ -65,7 +63,6 @@ sub new
     my $class = ref($proto) || $proto;
 
     my $self = {};
-    $self->{ 'name' } = $proto;
 
     # verbose?
     $self->{ 'verbose' } = $supplied{ 'verbose' } || 0;
@@ -75,11 +72,6 @@ sub new
 }
 
 
-sub name
-{
-    my ($self) = (@_);
-    return ( $self->{ 'name' } );
-}
 
 
 =begin doc
