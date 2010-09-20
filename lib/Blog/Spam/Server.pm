@@ -51,7 +51,7 @@ package Blog::Spam::Server;
 
 
 use vars qw($VERSION);
-our $VERSION = "0.9";
+our $VERSION = "0.9.1";
 
 #
 #  The modules we require
@@ -393,6 +393,15 @@ sub testComment
         $struct{ 'ip' } = $1;
     }
 
+
+    #
+    #  Pass ourself over to the plugin - primarily so that
+    # a plugin may call L<getState> to find a location to
+    # persist data to.
+    #
+    $struct{ 'parent' } = $self;
+
+
     #
     #  The mandatory values we expect by default.
     #
@@ -506,12 +515,6 @@ sub testComment
         #
         next if ($skipThis);
 
-        #
-        #  Pass ourself over to the plugin - primarily so that
-        # a plugin may call L<getState> to find a location to
-        # persist data to.
-        #
-        $struct{ 'parent' } = $self;
 
         #
         #  Call the plugin
@@ -640,6 +643,111 @@ sub testComment
     # Return the result to the caller.
     #
     return ($result);
+
+}
+
+
+
+
+=begin doc
+
+This method is invoked when a comment is to be re-trained.
+
+=end doc
+
+=cut
+
+sub classifyComment
+{
+    my ( $self, $xmlrpc, $struct ) = (@_);
+
+    #
+    #  The parameters the user submitted, as a hash so
+    # they're easy to work with.
+    #
+    my %struct;
+
+
+    #
+    #  Copy each supplied value to the struct we'll use
+    # from here on in - but lower-case the key-names.
+    #
+    foreach my $key ( keys %$struct )
+    {
+        my $lkey = lc($key);
+
+        $struct{ $lkey } = $struct->{ $key };
+    }
+
+    #
+    #  Log the peer.
+    #
+    if ( $xmlrpc->{ 'peerhost' } )
+    {
+        $struct{ 'peer' } = $xmlrpc->{ 'peerhost' };
+
+        $self->{ 'verbose' } &&
+          print "classifyComment: connection from " . $struct{ 'peer' } . "\n";
+
+    }
+
+
+
+    #
+    #  If we've got an IPv6 prefix remove it.
+    #
+    if ( $struct{ 'ip' } && ( $struct{ 'ip' } =~ /^::ffff:(.*)/i ) )
+    {
+        $struct{ 'ip' } = $1;
+    }
+
+
+    #
+    #  Pass ourself over to the plugin - primarily so that
+    # a plugin may call L<getState> to find a location to
+    # persist data to.
+    #
+    $struct{ 'parent' } = $self;
+
+
+    #
+    #  Call each plugin, which implements the classifycomment method,
+    # in sorted order.
+    #
+    foreach my $plugin ( @{ $self->{ 'plugins' } } )
+    {
+
+        #
+        #  Ignore plugins that don't implement testComment.
+        #
+        next unless ( $plugin->can("classifyComment") );
+
+        #
+        #  The name of the plugin
+        #
+        my $name = ref $plugin;
+
+        #
+        #  Call the plugin
+        #
+        $self->{ 'verbose' } && print "Calling plugin: $name\n";
+
+        my $result = $plugin->classifyComment(%struct);
+
+        if ( defined($result) && length($result) )
+        {
+            $self->{ 'verbose' } && print "\t=> $result\n";
+        }
+        else
+        {
+            $self->{ 'verbose' } && print "\t=> No result returned.\n";
+        }
+    }
+
+    #
+    # Return the result to the caller.
+    #
+    return ("TRAINED");
 
 }
 

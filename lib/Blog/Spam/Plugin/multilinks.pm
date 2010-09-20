@@ -126,8 +126,9 @@ sub testComment
     my $count = 0;
 
     $count += 1 if ( $body =~ /<a href="/i );
-    $count += 1 if ( $body =~ /\[url=http/i );
-    $count += 1 if ( $body =~ /\[link=http/i );
+    $count += 1 if ( $body =~ /\[url="+https?:/i );
+    $count += 1 if ( $body =~ /\[link="+https?:/i );
+    $count += 1 if ( $body =~ /[ \t]https?:/i );
 
     if ( $count > 1 )
     {

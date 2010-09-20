@@ -125,7 +125,6 @@ sub testComment
     #
     my $db = $dbdir . "/" . $site . ".db";
 
-
     #
     #  If the database doesn't exist we must create it.
     #
@@ -246,9 +245,16 @@ sub classifyComment
     my $db = $dbdir . "/" . $site . ".db";
 
     #
-    #  If the file doesn't exist we cannot train.
+    #  If the file doesn't exist we must create it.
     #
-    return unless ( -e $db );
+    #  TODO:
+    #  TODO: Is it an error to train against an empty DB?
+    #  TODO:
+    #
+    if ( !-e $db )
+    {
+        system("sb_filter.py -n -d $db");
+    }
 
     #
     #  Get the comment body.
@@ -258,42 +264,41 @@ sub classifyComment
 
 
     #
-    #  Create the spambayes database if it is missing
-    #
-    if ( !-e $db )
-    {
-        system( "sb_filter.py", "-n", "-d", $db );
-    }
-
-
-    #
     #  Map training to appropriate argument
     #
+    my $flag = "";
     if ( $train =~ /ok/i )
     {
-        $train = "-g";
+        $flag = "-g";
     }
     elsif ( $train =~ /spam/i )
     {
-        $train = "-s";
+        $flag = "-s";
     }
 
     #
     #  Now train
     #
-    open( HANDLE, "|sb_filter.py -d $db $train -f >/dev/null" );
+    open( HANDLE, "|sb_filter.py -d $db $flag -f >/dev/null" );
     print HANDLE $body;
     close HANDLE;
 
     #
     #  Log to see if we have malicious training.
     #
-    my $trained = $state . "/retrained/";
+    my $trained = $state . "/retrained/$train/";
     mkpath( $trained, { verbose => 0 } ) unless ( -d $trained );
-    my $tmp = $trained . "/trained-as-$train.$$." . localtime;
+
+    my $tmp = $trained . time . ".$$";
     if ( open( LOG, ">", $tmp ) )
     {
-        print LOG $body;
+        foreach my $key ( keys %params )
+        {
+            next if ( $key =~ /^comment$/i );
+
+            print LOG $key . ": " . $params{ $key } . "\n";
+        }
+        print LOG "\n" . $body . "\n";
         close(LOG);
     }
 

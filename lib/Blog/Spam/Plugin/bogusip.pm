@@ -47,6 +47,8 @@ package Blog::Spam::Plugin::bogusip;
 use strict;
 use warnings;
 
+use Net::CIDR::Lite;
+
 
 =begin doc
 
@@ -90,13 +92,26 @@ sub testComment
     #  Get the IP - this is mandatory, but it might be ipv6.
     #
     my $ip = $params{ 'ip' };
+    return "OK" if ( $ip =~ /:/ );
+
 
     #
-    #  Skip a couple of ranges.
+    #  Quick test on leading octet
     #
-    return "SPAM:Internal IP"
-      if ( ( $ip =~ /^10\.0/ ) ||
-           ( $ip =~ /^192\.168\./ ) );
+    return "OK" unless ( $ip =~ /^(10|172|192)\./ );
+
+
+    #
+    #  For each internal range, test.
+    #
+    foreach my $range (qw! 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16 !)
+    {
+        my $cidr = Net::CIDR::Lite->new;
+        $cidr->add_any($range);
+
+        return "SPAM:Internal Only IP"
+          if ( $cidr->find($ip) );
+    }
 
     return "OK";
 }

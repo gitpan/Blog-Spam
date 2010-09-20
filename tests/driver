@@ -43,6 +43,8 @@ $CONFIG{ 'pass' } = $CONFIG{ 'fail' } = 0;
 exit
   if (
        !GetOptions( "test=s",   \$CONFIG{ 'test' },
+                    "file=s",   \$CONFIG{ 'test' },
+                    "verbose",  \$CONFIG{ 'verbose'},
                     "server=s", \$CONFIG{ 'server' }, ) );
 
 
@@ -151,6 +153,10 @@ sub testTheFile
         {
             $params{ 'subject' } = $1;
         }
+        elsif ( $line =~ /^Site: (.*)/i )
+        {
+            $params{ 'site' } = $1;
+        }
         elsif ( $line =~ /^Options: (.*)/i )
         {
             $params{ 'options' } = $1;
@@ -209,12 +215,18 @@ sub testTheFile
     #  Did we get the result we wanted?
     #
     my $literal = $result;
+    my $explain = $result;
+
+    # the result + the explaination.
     $result = $1 if ( $result =~ /^([^:]+):(.*)/ );
     $result = uc($result);
 
+    $explain = $2 if ( $explain =~ /^([^:]+):(.*)/ );
+
+
     if ( $result eq $expected )
     {
-        print "OK - $file\n";
+        print "OK - $file - $explain\n";
         $CONFIG{ 'pass' } += 1;
     }
     else

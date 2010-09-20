@@ -16,7 +16,7 @@ and in that home directory.
 crontab
 -------
 
-A script which will schedule maintainance, and which again relies upon
+A script which will schedule maintenance, and which again relies upon
 a local s-blogspam user.
 
 

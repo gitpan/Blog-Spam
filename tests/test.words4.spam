@@ -1,5 +1,5 @@
 IP: 12.13.14.15
-Options: min-words=10
+Options: min-words=10,exclude=rdns
 
 
 This is test ok.
