@@ -51,7 +51,7 @@ package Blog::Spam::Server;
 
 
 use vars qw($VERSION);
-our $VERSION = "0.9.1";
+our $VERSION = "0.9.2";
 
 #
 #  The modules we require
