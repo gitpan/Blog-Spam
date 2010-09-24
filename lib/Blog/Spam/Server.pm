@@ -51,7 +51,7 @@ package Blog::Spam::Server;
 
 
 use vars qw($VERSION);
-our $VERSION = "1.0.1";
+our $VERSION = "1.0.2";
 
 #
 #  The modules we require
@@ -831,8 +831,7 @@ sub getPlugins
 {
     my ( $self, $xmlrpc ) = (@_);
 
-    my $results;
-
+    my %hash;
 
     foreach my $plugin ( sort $self->plugins() )
     {
@@ -848,9 +847,11 @@ sub getPlugins
         #
         $name = "bayesian" if ( $name =~ /bayasian/i );
 
-        push( @$results, $name );
+        $hash{ $name } = 1;
     }
-    return ($results);
+
+    my @all = sort keys %hash;
+    return (\@all );
 }
 
 

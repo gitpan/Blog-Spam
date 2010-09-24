@@ -1,6 +1,6 @@
 --- #YAML:1.0
 name:               Blog-Spam
-version:            1.0.1
+version:            1.0.2
 abstract:           Test blog comments for SPAM, in real-time
 author:
     - Steve Kemp <steve@steve.org.uk>

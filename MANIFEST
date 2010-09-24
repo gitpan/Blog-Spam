@@ -4,7 +4,7 @@ lib/Blog/Spam/Plugin/00blacklist.pm
 lib/Blog/Spam/Plugin/00whitelist.pm
 lib/Blog/Spam/Plugin/Sample.pm
 lib/Blog/Spam/Plugin/badip.pm
-lib/Blog/Spam/Plugin/bayasian.pm
+lib/Blog/Spam/Plugin/bayesian.pm
 lib/Blog/Spam/Plugin/bogusip.pm
 lib/Blog/Spam/Plugin/drone.pm
 lib/Blog/Spam/Plugin/dropme.pm
