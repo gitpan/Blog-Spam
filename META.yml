@@ -1,23 +1,31 @@
 --- #YAML:1.0
-name:                Blog-Spam
-version:             1.0
-abstract:            Test blog comments for SPAM, in real-time
-license:             ~
-author:              
+name:               Blog-Spam
+version:            1.0.1
+abstract:           Test blog comments for SPAM, in real-time
+author:
     - Steve Kemp <steve@steve.org.uk>
-generated_by:        ExtUtils::MakeMaker version 6.42
-distribution_type:   module
-requires:     
-    Getopt::Long:                  
-    IPC::Open2:                    
-    LWP::Simple:                   
-    Module::Pluggable:             
-    Net::CIDR::Lite:               
-    Net::DNS::Resolver:            
-    RPC::XML::Server:              
-    Sys::Syslog:                   
-    Test::More:                    
-    URI::Find:                     
+license:            unknown
+distribution_type:  module
+configure_requires:
+    ExtUtils::MakeMaker:  0
+build_requires:
+    ExtUtils::MakeMaker:  0
+requires:
+    Getopt::Long:        ~
+    IPC::Open2:          ~
+    LWP::Simple:         ~
+    Module::Pluggable:   ~
+    Net::CIDR::Lite:     ~
+    Net::DNS::Resolver:  ~
+    RPC::XML::Server:    ~
+    Sys::Syslog:         ~
+    Test::More:          ~
+    URI::Find:           ~
+no_index:
+    directory:
+        - t
+        - inc
+generated_by:       ExtUtils::MakeMaker version 6.55_02
 meta-spec:
-    url:     http://module-build.sourceforge.net/META-spec-v1.3.html
-    version: 1.3
+    url:      http://module-build.sourceforge.net/META-spec-v1.4.html
+    version:  1.4

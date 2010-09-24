@@ -10,7 +10,7 @@ Blog::Spam::Plugin::Sample - A sample plugin.
 This is a sample plugin which is designed to demonstrate the functionality
 which a plugin may implement to be usefully called by L<Blog::Spam::Server>.
 
-As this is just an example plugin it does nothing useful.
+As this is an example plugin it does nothing useful.
 
 =cut
 
@@ -35,17 +35,22 @@ For a plugin to be loaded it must live beneath the L<Blog::Spam::Plugin>
 namespace.
 
 There are only a single mandatory method which must be implemented ("new"),
-and three optional methods ("testComment", "expire", "logMessage").
+and several optional methods ("classifyComment", "testComment", "expire",
+"logMessage").
 
-The B<new> method is required for the plugin loading to succeed - the latter
-three optional methods are invoked at various points.
+The B<new> method is required for the plugin loading to succeed.  The
+optional methods are invoked at various points in the servers lifecycle,
+if they are present.
 
 For example the B<testComment> method will be called to test the state
 of an incoming comment "SPAM" or "OK".  The B<expire> method will be
 called periodically, if available, to carry out house-keeping tasks.
 
-Finally the B<logMessage> method will be invoked, when implemented,
-when the server has decided whether a message is SPAM or OK.
+The B<classifyComment> method is called only when a request to
+retrain a comment is received.
+
+Finally the B<logMessage> method will be invoked when the server has
+determined an incoming message is either SPAM or OK.
 
 =cut
 
@@ -62,7 +67,12 @@ use warnings;
 =head2 new
 
 This method is called when the server is started, and all plugins
-are loaded.   This method is mandatory.
+are loaded.
+
+This method is mandatory.
+
+A given plugin will only be initialised once when the server is launched,
+which permits the plugin to cache state internally if it wishes.
 
 =cut
 
@@ -91,15 +101,17 @@ test.
 The arguments are a pointer to the server object, and a hash of values
 read from the remote client.  (These remote keys include such things
 as the IP address of the comment submitter, their name, their email
-address and the comment itself.  For a full list please consult
-L<Blog::Spam::API>.)
+address and the comment itself.  For a complete list of available
+keys please consult L<Blog::Spam::API>.)
 
 =over 8
 
 =item ip
+
 The IP address of the comment submitter.
 
 =item comment
+
 The text of the comment received.
 
 =back
@@ -129,6 +141,8 @@ sub testComment
 
 
 =head2 expire
+
+This method is B<optional>.
 
 Some plugins maintain state which must be expired.   If this method is
 implemented it will be invoked upon a regular frequency, with the intention
@@ -182,32 +196,62 @@ sub expire
 
 
 
+=head2 classifyComment
+
+This method is B<optional>.
+
+This method is called whenever a comment is submitted for retraining,
+because the server was judged to return the wrong result.
+
+The parameters received are identical to those of the B<testComment>
+method - with the addition of a new key "train":
+
+=over 8
+
+=item spam
+
+The comment was returned by the server as being OK but it should have
+been marked as SPAM.
+
+=item ok
+
+The comment was previously judged as SPAM, but this was an error and the
+comment was actually both welcome and valid.
+
+
+=back
+
+=cut
+
+sub classifyComment
+{
+
+    # NOP
+}
+
+
+
 =head2 logMessage
 
 This method is B<optional>.
 
 This method will be called when the server wishes to log a result
-of a connection.  ie. It will be called once for each received comment
+of a connection.  ie. It will be called once for each comment
 at the end of the B<testComment> function.
 
 The message structure, as submitted to testing, will be supplied as
-a hash, and this hash will contain a couple of additional keys:
+a hash, and this hash will contain a pair of additional keys:
 
 =over 8
 
 =item result
 
-The result of the test "OK" or "SPAM:[reson]".
+The result of the test "OK" or "SPAM:[reason]".
 
 =item blocker
 
 If the result of the test was not "OK" then the name of the plugin
 which caused the rejection will be saved in this key.
-
-=item peer
-
-The remote IP address of the client which submitted the message
-for testing.
 
 =back
 

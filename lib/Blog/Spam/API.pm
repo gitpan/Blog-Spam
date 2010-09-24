@@ -1,29 +1,48 @@
 
 =head1 NAME
 
-Blog::Spam::API - A description of Blog-Spam XML-RPC API.
+Blog::Spam::API - A description of Blog-Spam API.
 
 =cut
 
 =head1 ABOUT
 
 This document discusses the API which is presented by the
-L<Blog::Spam::Server>.  This API is exposed via XML-RPC
-such that it may be called by remote locations.
+L<Blog::Spam::Server> to remote clients via XML::RPC.
+
+The server itself has two APIs:
+
+=over 8
+
+=item The XML::RPC API
+
+This is the API which is presented to remote callers.
+
+=item The Plugin API
+
+The API that the server itself uses, and which plugins must
+conform to, in order to be both used and useful.  The internal
+plugin API is documented and demonstrated in the L<the sample plugin|Blog::Spam::Plugin::Sample>.
+
+=back
 
 =cut
 
-=head1 XML-RPC METHODS
+=head1 The XML-RPC API
 
-The L<Blog::Spam::Server> exposes several methods to clients from
-remote locations.  The following methods are documented:
+The L<Blog::Spam::Server> exposes several methods to clients via
+XML::RPC.
+
+The following methods L<are documented|http://api.blogspam.net/> as being available:
 
 =over 8
 
 =item testComment
 
 This is the method which is used to test a submitted comment from
-a blog or server.
+a blog or server.  Given a structure containing information about
+a single comment submission it will return a result of either
+"spam" or "ok".
 
 =item getPlugins
 
@@ -32,16 +51,18 @@ such that a remote machine may selectively disable some of them.
 
 =item getStats
 
-Return the statistics for SPAM detection for a given domain.
+Return the number of spam vs. non-spam comments which have been
+submitted by the current site.
 
 =item classifyComment
 
-This allows a limited amount of re-training for a submitted comment.
+If a previous "testComment" invocation returned the wrong result then
+this method allows it to be reset.
 
 =back
 
 Each of these methods will be discussed in order of importance, and
-additional documentation is available online via http://api.blogspam.net/
+L<additional documentation is available online|http://api.blogspam.net/>.
 
 =cut
 
@@ -67,38 +88,48 @@ keys:
 =over 8
 
 =item agent
+
 The user-agent of the submitting browser, if any.
 
 =item comment
-The body of the comment
+
+The body of the comment the remote user submitted.
 
 =item email
+
 The email address submitted along with the comment.
 
 =item fail
+
 If this key is present your comment will always be returned as SPAM; useful
-for testing if nothing else.  This handling is implemented by L<Blog::Spam::Plugin::fail>.
+for testing if nothing else.  This handling is implemented by the plugin
+L<Blog::Spam::Plugin::fail>.
 
 =item ip
+
 The IP address the comment was submitted from.
 
 =item name
-The name the user chose, if any.
+
+The name of the comment submitter, if any.
 
 =item subject
-The subject the user chose, if any.
+
+The subject the comment submitter chose, if any.
 
 =item site
-A HTTP link to I<your> site.  (Use $ENV{'SERVER_NAME'} if possible.)
+
+A HTTP link to I<your> site which received the comment submission.
+In most cases using $ENV{'SERVER_NAME'} is the correct thing to do.
 
 =item options
+
 Customization options for the testing process, discussed in the section L<TESTING OPTIONS|Blog::Spam::API/"TESTING OPTIONS">.
 
 =back
 
-The only mandatory arguments are "comment" and "ip", the rest are
-optional but may be useful and it is recommended you pass them if
-you can.  (Each key should be lower-cased.)
+The only mandatory structure members are "comment" and "ip", the rest are
+optional but recommended.
 
 The return value from this method will either be "OK", or "SPAM".
 
@@ -115,7 +146,6 @@ SPAM, for example:
 
 =head2 classifyComment
 
-
 The classifyComment method has the following XML-RPC signature:
 
 =for example begin
@@ -128,7 +158,8 @@ This means the method takes a "struct" as an argument, and returns
 a string.  In Perl terms the struct is a hash.
 
 The keys to this method are identical to those in the testComment
-method - the only difference is that the "train" key is mandatory:
+method - the only difference is that an additional key, "train",
+is recognised and it is mandatory:
 
 =over 8
 
@@ -138,7 +169,8 @@ Either "ok" or "spam" to train the comment appopriately.
 =back
 
 If the comment was permitted to pass, but should have been rejected
-as SPAM set the train parameter to "spam".
+as SPAM set the train parameter to "spam", if it was rejected and
+should not have been set the train parameter to "ok".
 
 =cut
 
@@ -158,8 +190,7 @@ This method does nothing more than return the names of each of the plugins
 which the server has loaded.
 
 These plugins are modules beneath the Blog::Spam::Plugin:: namespace,
-and L<the sample plugin|Blog::Spam::Plugin::Sample> provides a good
-example.
+and their names are the module names minus the prefix.
 
 =cut
 
@@ -187,9 +218,11 @@ testComment - as that is how sites are identified.
 
 =head1 TESTING OPTIONS
 
-You may pass the optional "options" key to the hash of arguments provided
-to the testComment method.  This is useful to provide you with the ability
-to tune the behaviour of tests which are made.
+When a comment is submitted for testing, via the testComment XML::RPC
+method it may have an "options" key in the structure submitted.
+
+The options string allows the various tests to be tweaked or changed
+from their default behaviours.
 
 This option string should consist of comma-separated tokens.
 
@@ -227,9 +260,9 @@ That example will:
 
 2.  Makes the "name" field mandatory.
 
-3.  Whitelists any comments subitted from the IP 1.2.3.4
+3.  Whitelists any comment(s) submitted from the IP 1.2.3.4
 
-4.  Causes the server to not run the surbl test.
+4.  Causes the server to not run the L<surbl plugin|Blog::Spam::Plugin::surbl>.
 
 =cut
 

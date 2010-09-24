@@ -51,7 +51,7 @@ package Blog::Spam::Server;
 
 
 use vars qw($VERSION);
-our $VERSION = "1.0";
+our $VERSION = "1.0.1";
 
 #
 #  The modules we require
@@ -441,7 +441,15 @@ sub testComment
         }
         if ( $option =~ /^exclude=(.*)/i )
         {
-            $skip{ $1 } = 1;
+            my $plugin = $1;
+
+            #
+            #  We'll change the bogus name we used to use into
+            # the real one we should use.
+            #
+            $plugin = "bayesian" if ( $plugin =~ /bayasian/i );
+
+            $skip{ $plugin } = 1;
         }
     }
 
@@ -834,6 +842,12 @@ sub getPlugins
         {
             $name = $1;
         }
+
+        #
+        #  Patch up a bogus spelling.
+        #
+        $name = "bayesian" if ( $name =~ /bayasian/i );
+
         push( @$results, $name );
     }
     return ($results);
